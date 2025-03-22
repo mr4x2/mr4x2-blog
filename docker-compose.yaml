@@ -3,10 +3,9 @@ networks:
     external: true
 services:
   hugo-blog:
-    image: hugomods/hugo:exts-non-root
-    command: server -D --appendPort=false --baseURL=https://mr4x2.com/ 
+    image: mr4x2/hugo-blog:v1
+    command: server -D --appendPort=false --baseURL=${BASE_URL}
     volumes:
-      - ./:/src
       - ~/hugo_cache:/tmp/hugo_cache
     restart: unless-stopped
     labels:
