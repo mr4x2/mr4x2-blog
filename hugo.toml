@@ -1,6 +1,6 @@
 baseURL = 'https://mr4x2.com'  # Your domain name.
 languageCode = 'en-US'
-title = 'mr4x2'  # Title of your website
+title = 'mr4x2 blog'  # Title of your website
 
 [params]
   github = 'https://github.com/mr4x2'
@@ -19,6 +19,24 @@ title = 'mr4x2'  # Title of your website
     inputPosition = 'bottom'
     theme = 'light'
     lang = 'en'
+
+[markup]
+  defaultMarkdownHandler = "goldmark"
+  # By default, Goldmark trims unsafe outputs which might prevent some shortcodes from rendering.
+  # It is recommended to set markup.goldmark.renderer.unsafe=true if you encounter problems.
+  [markup.goldmark]
+    [markup.goldmark.renderer]
+      unsafe = true  # Enable user to embed HTML snippets in Markdown content.
+  [markup.highlight]
+    codeFences = true
+    guessSyntax = true
+    lineNos = false
+    noClasses = false
+    tabWidth = 4
+  [markup.tableOfContents]
+    startLevel = 2
+    endLevel = 4
+    ordered = true
 
 [pagination]
   pagerSize = 5  # Specify the max number of rows to be returned in list
