@@ -10,12 +10,18 @@ title = 'mr4x2 blog'  # Title of your website
   # input the repository for the discussions below. For more details, see
   # https://giscus.app
   [params.giscus]
-    repo = '[ENTER REPO HERE]'
-    repoId = '[ENTER REPO ID HERE]'
-    category = '[ENTER CATEGORY NAME HERE]'
-    categoryId = '[ENTER CATEGORY ID HERE]'
+    repo = 'mr4x2/mr4x2-blog'
+    repoId = 'R_kgDOOFu3XQ'
+    category = 'General'
+    categoryId = 'DIC_kwDOOFu3Xc4CoYd_'
     mapping = 'pathname'
     reactionsEnabled = '1'
+    data-emit-metadata="1"
+    data-input-position="top"
+    data-theme="light"
+    data-lang="en"
+    data-loading="lazy"
+    crossorigin="anonymous"
     inputPosition = 'bottom'
     theme = 'light'
     lang = 'en'
