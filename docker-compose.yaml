@@ -3,7 +3,7 @@ networks:
     external: true
 services:
   hugo-blog:
-    image: mr4x2/hugo-blog:v1
+    image: mr4x2/hugo-blog:latest
     command: server -D --appendPort=false --baseURL=${BASE_URL}
     volumes:
       - ~/hugo_cache:/tmp/hugo_cache
