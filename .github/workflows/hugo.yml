@@ -51,10 +51,7 @@ jobs:
       - name: Run Hugo
         working-directory: .
         run: hugo --themesDir .
-  
-  build:
-    runs-on: ubuntu-latest
-    steps:
+      
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
       
@@ -86,3 +83,4 @@ jobs:
         run: |
           rm -rf ${{ runner.temp }}/.buildx-cache
           mv ${{ runner.temp }}/.buildx-cache-new ${{ runner.temp }}/.buildx-cache
+      
