@@ -6,7 +6,7 @@ on:
   push:
     branches: ["main"]
   pull_request:
-    branches: ["main"]
+    branches: ["main", "blog/**"]
 
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
@@ -32,37 +32,23 @@ jobs:
 
   update:
     runs-on: ubuntu-latest
-    container:
-      image: hugomods/hugo:go
+    strategy:
+      matrix:
+        hugo-version:
+          - 'latest'
+          - '0.134.2'
     steps:
       - uses: actions/checkout@v4
-
-      - name: Update modules
-        run: hugo mod get -u
-
-      - name: Tidy modules
-        run: hugo mod tidy
-
-      - uses: actions/upload-artifact@v4
         with:
-          name: deps-hugo-modules
-          path: |
-            go.sum
-            go.mod
+          submodules: true  # Fetch Hugo themes (true OR recursive)
+          fetch-depth: 0    # Fetch all history for .GitInfo and .Lastmod
 
-  commit:
-    needs: update
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-
-      - uses: actions/download-artifact@v4
+      - name: Setup Hugo
+        uses: peaceiris/actions-hugo@v3
         with:
-          name: deps-hugo-modules
+          hugo-version: ${{ matrix.hugo-version }}
+          extended: true
 
-      - name: Create Pull Request
-        uses: peter-evans/create-pull-request@v7
-        with:
-          commit-message: "chore(deps): update modules"
-          branch: deps-hugo-modules
-          title: Update Hugo Modules
+      - name: Run Hugo
+        working-directory: .
+        run: hugo serve
