@@ -52,5 +52,3 @@ jobs:
         working-directory: .
         run: hugo --themesDir .
       
-      - name: Test connection
-        run: curl localhost:1313
