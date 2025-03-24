@@ -52,3 +52,6 @@ jobs:
       - name: Run Hugo
         working-directory: .
         run: hugo serve
+      
+      - name: Test connection
+        run: curl localhost:1313
