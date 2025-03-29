@@ -5,13 +5,10 @@ tags: ["travel", "thailand", "fossasia"]
 date: "2025-03-29T14:25:00+07:00"
 image: ['trip-in-Thailand/speakers.JPEG']
 header:
-  image: "trip-in-Thailand/speakers.JPEG"
+  image: trip-in-Thailand/speakers.JPEG
   caption: ""
-image:
-  caption: ""
-  focal_point: ""
-  preview_only: true
 image_preview: ['trip-in-Thailand/speakers.JPEG']
+header_image: trip-in-Thailand/speakers.JPEG
 ---
 
 ## This is my first blog
