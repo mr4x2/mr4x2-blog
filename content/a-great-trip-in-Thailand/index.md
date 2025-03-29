@@ -15,7 +15,7 @@ After a lot of procrastinations, today I've finally decided to publish my blog. 
 
 This trip was our plan(<a href="https://hoangndst.com" target="_blank">@hoangndst</a> and I) which was planned in early January when <a href="https://eventyay.com/e/4c0e0c27" target="_blank">Fossasia 2025</a> was scheduled to be hosted in Thailand, at which Hoang had a session that he shared about <a href="https://eventyay.com/e/4c0e0c27/session/9434#info" target="_blank">Optimizing the Software Development Process with Internal Developer Platform and Kusion</a>. 
 
-Another reason I want to go with Hoang to Thailand to save our nice memories before Hoang studies aboard in USA. 
+Another reason I want to go with Hoang to Thailand to save our nice memories before Hoang studies abroad in USA. 
 
 ### Day 1 - Khaosand rd
 
