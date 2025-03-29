@@ -3,10 +3,7 @@ title: "A great trip in Thailand"
 summary: "First blog and some words which I want to tell you about my trip in Thailand."
 tags: ["travel", "thailand", "fossasia"]
 date: "2025-03-29T14:25:00+07:00"
-header:
-  image: "trip-in-Thailand/speakers.JPEG"
-  caption: ""
-images: ['speakers.JPEG']
+image: ["speakers.JPEG"]
 ---
 
 ## This is my first blog
