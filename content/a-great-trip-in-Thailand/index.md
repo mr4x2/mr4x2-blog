@@ -6,6 +6,7 @@ date: "2025-03-29T14:25:00+07:00"
 header:
   image: "trip-in-Thailand/speakers.JPEG"
   caption: ""
+images: ['speakers.JPEG']
 ---
 
 ## This is my first blog
