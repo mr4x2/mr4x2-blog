@@ -26,7 +26,7 @@ Welcome to my profile! I'm a passionate developer who loves exploring new techno
 
 - [Openinfra & Cloud Native Day Vietnam 2025](https://2025.vietopeninfra.org) 🗓️: July 26, 2025 <span style="color:green;">Finished</span>
 
-- [OpenInfra Summit Europe 2025](https://summit2025.openinfra.org/a/schedule) 🗓️: October 19, 2025 <span style="color:yellow;">Coming soon</span>
+- [OpenInfra Summit Europe 2025](https://summit2025.openinfra.org/a/schedule) 🗓️: October 19, 2025 <span style="color:orange;">Coming soon</span>
 
 ## 📫 Connect with Me
 
