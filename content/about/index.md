@@ -23,7 +23,10 @@ Welcome to my profile! I'm a passionate developer who loves exploring new techno
 [comment]: <![Top Langs](https://github-readme-stats.vercel.app/api/top-langs/?username=batamsieuhang&layout=compact&theme=radical)> 
 
 ## 🎤 My Presentations
+
 - [Openinfra & Cloud Native Day Vietnam 2025](https://2025.vietopeninfra.org) 🗓️: July 26, 2025 <span style="color:green;">Finished</span>
+
+- [OpenInfra Summit Europe 2025](https://summit2025.openinfra.org/a/schedule) 🗓️: October 19, 2025 <span style="color:yellow;">Coming soon</span>
 
 ## 📫 Connect with Me
 
