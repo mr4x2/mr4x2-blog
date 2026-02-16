@@ -1,9 +1,9 @@
 ---
 title: "Memorable days in France"
-summary: "In 2025, I had an opportunity to present a session in OpenInfra Europe 2025 in France. This blog will share my experience during trip to France."
-tags: ["travel", "france", "openinfra submit"]
+summary: "In 2025, I had an opportunity to present a session at OpenInfra Europe 2025 in France. In 2025, I had an opportunity to present a session at OpenInfra Europe 2025 in France. This blog shares my experience during my trip to France."
+tags: ["travel", "France", "openinfra submit"]
 date: "2026-02-16T00:00:00+07:00"
-image: ["speakers.JPEG"]
+image: ["IMG_7498.JPEG"]
 ---
 
 ## Introduction
