@@ -14,14 +14,14 @@ Personal Hugo blog (mr4x2.com): travel and tech posts in English.
 
 ## Layout and theme
 
-- The theme is vendored. `layouts/` holds the hugo-discaptive templates, edited in place, and `theme.toml` is that theme's metadata. There is no theme directory, and the submodule listed in `.gitmodules` is stale (it doesn't exist).
-- `assets/css/output.css` is the compiled Tailwind file, committed to the repo. It is what `layouts/partials/head/css.html` loads. `npm run watch` writes to `static/css/`, which the site never reads. Use `npm run build`, or run the watch with `-o ./assets/css/output.css`.
+- The theme is vendored. `layouts/` holds the hugo-discaptive templates, edited in place, and `theme.toml` is that theme's metadata. There is no theme directory or submodule.
+- `assets/css/output.css` is the compiled Tailwind file, committed to the repo. It is what `layouts/partials/head/css.html` loads, and both `npm run build` and `npm run watch` write to it.
 - `public/` and `resources/` are generated build output.
 
 ## Posts
 
 - Each post is `content/<slug>/index.md`. Its photos live in `static/trip-in-<place>/`, not in the post folder. Reference them as `![alt](trip-in-<place>/IMG.JPEG#center "Caption")`: `#center` centers the image and the title becomes the caption. The `hugomods/images` module renders these.
-- The front-matter `image: ["file.JPEG"]` sets the social preview. `layouts/partials/head.html` looks for it only in `static/images/`, so copy the file there too.
+- The front-matter `image: ["trip-in-<place>/IMG.JPEG"]` sets the social preview. Give its path under `static/`, the same one the post's photos use. Without it, pages fall back to `static/images/og-image.png`.
 - Links between posts use `{{< ref "/<slug>/index.md" >}}`. Raw HTML is allowed in Markdown (`markup.goldmark.renderer.unsafe = true`); posts use it for `target="_blank"` links and iframes.
 - The author writes these posts partly to practice English. When editing a post, fix grammar and keep their wording and voice.
 

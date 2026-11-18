@@ -4,7 +4,7 @@
 {{ $image := $defaultImage }}
 
 {{ if .Params.image }}
-  {{ $image = printf "%s%s" .Site.BaseURL (print "images/" (index .Params.image 0)) }}
+  {{ $image = absURL (index .Params.image 0) }}
 {{ end }}
 
 
