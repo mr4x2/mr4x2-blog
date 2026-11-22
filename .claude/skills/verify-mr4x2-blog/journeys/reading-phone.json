@@ -1,0 +1,9 @@
+[
+  {"goto": "/reading/"},
+  {"expect": "document.documentElement.scrollWidth <= screen.width", "label": "no sideways scroll with a long unbroken title"},
+  {"shot": "phone"},
+  {"click": {"role": "button", "name": "storage"}},
+  {"wait": "location.hash === '#tag=storage'"},
+  {"expect": "$({role:'status'}).textContent.trim()", "equals": "2 of 5"},
+  {"shot": "phone-tag"}
+]

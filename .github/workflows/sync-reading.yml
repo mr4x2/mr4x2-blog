@@ -1,0 +1,46 @@
+name: Sync reading
+
+on:
+  schedule:
+    - cron: '17 * * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  actions: write
+
+concurrency:
+  group: sync-reading
+  cancel-in-progress: false
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Run tests
+        run: python3 -m unittest discover -s scripts
+
+      - name: Sync from Raindrop
+        env:
+          RAINDROP_TOKEN: ${{ secrets.RAINDROP_TOKEN }}
+          RAINDROP_COLLECTION_ID: ${{ secrets.RAINDROP_COLLECTION_ID }}
+        run: python3 scripts/sync_raindrop.py
+
+      - name: Commit and deploy
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          if [ -z "$(git status --porcelain data/reading.json)" ]; then
+            echo "data/reading.json unchanged"
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898283+github-actions[bot]@users.noreply.github.com"
+          git add data/reading.json
+          git commit -m "chore(reading): sync from Raindrop"
+          git pull --rebase origin main
+          git push origin HEAD:main
+          # A push made with GITHUB_TOKEN doesn't trigger other workflows, but a dispatch does.
+          gh workflow run hugo.yml --ref main
