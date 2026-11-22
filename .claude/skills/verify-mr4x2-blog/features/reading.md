@@ -4,7 +4,7 @@ The Reading page (`/reading/`, new in #15) lists every Bookmark from the Reading
 
 ## Sub-features
 
-- `reading-menu` links the header `Reading` item, between Tags and About, to `/reading/`.
+- `reading-menu` links the header `reading/` item, the first one, to `/reading/`.
 - `reading-list` shows one flat list, newest first, with no month headings.
 - `reading-row` gives the Read date, a title link with `target="_blank" rel="noopener"`, the site, and the Note in italics when it isn't empty, keeping its line breaks. Rows show no tags, and the Excerpt is never shown.
 - `reading-tag` filters to one Bookmark tag when its button is clicked. The URL becomes `#tag=<key>` and the button shows as pressed. Buttons are ordered by count, then name, and show the tag as written (`machine learning`). The key replaces spaces with `-` (`#tag=machine-learning`).
@@ -19,7 +19,7 @@ The Reading page (`/reading/`, new in #15) lists every Bookmark from the Reading
 
 ## How to get to it (user POV)
 
-- Click `Reading` in the header menu on any page.
+- Click `reading/` in the header menu on any page.
 - Open `/reading/` directly, or a shared filtered link `/reading/#tag=<key>`.
 
 ## Driving it with drive.mjs
@@ -35,12 +35,13 @@ The journeys are committed step files. Run each against the fixture, then restor
 ```bash
 K=.claude/skills/verify-mr4x2-blog
 node $K/scripts/drive.mjs --run RUN_ID --name reading $K/journeys/reading.json
+node $K/scripts/drive.mjs --run RUN_ID --name reading-dark --dark $K/journeys/reading.json
 node $K/scripts/drive.mjs --run RUN_ID --name reading-phone --width 390 --height 844 $K/journeys/reading-phone.json
 node $K/scripts/drive.mjs --run RUN_ID --name reading-nojs --no-js $K/journeys/reading-nojs.json
 git checkout -- data/reading.json
 ```
 
-- **`reading.json`** opens the page from the menu, then checks the menu order, the row dates newest first, no month headings, title links with `noopener`, escaping, the two-line Note, the hidden Excerpt, button order and labels, and `5 of 5`. It clicks `ceph` (`1 of 5`, pressed), then `machine learning` (`#tag=machine-learning`), then All. It searches for `BlueStore` (Excerpt only), `  tiếng ` (trimmed) and `zzz-nothing` (`0 of 5`), and checks search plus tag. It leaves for `/` (Reading not in All Posts), opens `/reading/#tag=storage` (`2 of 5`), checks `/tags/` has no Bookmark tags, and opens `/reading/#tag=nope` (falls back to All).
+- **`reading.json`** opens the page from the menu, then checks the menu order, the row dates newest first, no month headings, title links with `noopener`, escaping, the two-line Note, the hidden Excerpt, button order and labels, and `5 of 5`. It clicks `ceph` (`1 of 5`, pressed), then `machine learning` (`#tag=machine-learning`), then All. It searches for `BlueStore` (Excerpt only), `  tiếng ` (trimmed) and `zzz-nothing` (`0 of 5`), and checks search plus tag. It leaves for `/` (Reading not in the list), opens `/reading/#tag=storage` (`2 of 5`), checks `/tags/` has no Bookmark tags, and opens `/reading/#tag=nope` (falls back to All).
 - **`reading-phone.json`** at 390 px: no sideways scroll, then a tag click.
 - **`reading-nojs.json`**: all 5 rows visible, controls hidden.
 - **Empty.** Replace `data/reading.json` with `[]` (the committed state) or move it aside, then `{"goto": "/reading/"}` and `{"expect": "document.body.innerText.includes('Nothing here yet.')"}`.
@@ -53,5 +54,5 @@ git checkout -- data/reading.json
 - In `local` mode, live reload re-renders the page after you edit `data/reading.json` or the template, but an open journey keeps the old DOM. Run a new `goto` afterwards, and give the server a few seconds. `prod` mode is a static snapshot, so stop and relaunch it after every edit.
 - A `goto` that changes only the hash (`/reading/` to `/reading/#tag=x`) doesn't reload the page, so the search box keeps its query, and search and tag combine (for example `0 of 5`). To prove a shared link, start a fresh journey or `goto` another page first.
 - `#tag=` keys are lowercase, because the sync lowercases Bookmark tags. `#tag=Ceph` matches no button and falls back to All.
-- The page must not appear in "All Posts" (`home.md`, `home-no-reading`) or add Bookmark tags to Tags (`tags.md`). Check both after any change here.
+- The page must not appear in the home list (`home.md`, `home-list`) or add Bookmark tags to Tags (`tags.md`, `tags-no-bookmark-tags`). Check both after any change here.
 - A fixture `data/reading.json` must never be committed. Restore it with `git checkout -- data/reading.json`.

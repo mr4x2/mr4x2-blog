@@ -1,17 +1,13 @@
 {{ define "main" }}
-  <div class="mx-auto max-w-4xl px-4 sm:px-6 xl:px-0">
-    <div class="space-y-8 pb-12 pt-16">
-      <div class="space-y-2">
-        <h1 class="text-3xl font-bold text-gray-900 sm:text-4xl uppercase">
-          <span>{{ .Title }}</span>
-        </h1>
-      </div>
-
-      <ul class="divide-y divide-gray-200">
-        {{ range .Pages }}
-          {{ partial "post-summary.html" (dict "post" .) }}
-        {{ end }}
-      </ul>
-    </div>
+  <h1 class="sr-only">{{ .Title }}</h1>
+  <div class="sec">
+    <p class="cmd">
+      $ <b>ls -t ~/posts --tag={{ .Data.Term | urlize }}</b>
+    </p>
   </div>
+  <ul class="posts">
+    {{ range .Pages }}
+      {{ partial "post-summary.html" (dict "post" .) }}
+    {{ end }}
+  </ul>
 {{ end }}

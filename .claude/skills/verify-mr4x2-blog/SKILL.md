@@ -26,7 +26,8 @@ $V/verify.sh launch prod    # the repo's own static image (Hugo 0.154.5, Pagefin
 - **Ready** for `local` means the log contains `Web Server is available at` *and* `GET /` returns 200. **Ready** for `prod` means `GET /` returns 200. `launch` waits up to 60 s, or prints the log tail and cleans up after itself.
 - Use `prod` before claiming a change works on the live site. It is what production serves: Hugo 0.154.5, the Pagefind index, `nginx.conf`, and no drafts. This machine's own Hugo is 0.145, and template behavior differs between versions.
 - `prod` is a static snapshot of the working tree. It does not live-reload, so relaunch after every change, including `npm run build`. `local` live-reloads, so you can edit and re-drive without relaunching.
-- **Isolation:** two runs can be up at once, because each has its own port and run directory. Never drive the production container (`mr4x2-blog-hugo-blog-1`) or https://mr4x2.com for UI journeys. The live site is only for the deploy feature's read-only checks.
+- `local` renders to `public/`, which is gitignored. A page that no longer exists is still served from a file an earlier run left there, so a removed tag page can answer 200 on a stale tree. Delete `public/` before you launch `local`, and do not delete it while a `local` run is up. `prod` never sees `public/`, because `.dockerignore` leaves it out of the build.
+- **Isolation:** two runs can be up at once, because each has its own port and run directory. Two `local` runs share `public/`, though, so a page can carry the other run's base URL and live-reload port. Launch one at a time when a check reads absolute URLs. Never drive the production container (`mr4x2-blog-hugo-blog-1`) or https://mr4x2.com for UI journeys. The live site is only for the deploy feature's read-only checks.
 
 ## Doctor
 
