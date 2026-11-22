@@ -80,7 +80,7 @@ $V/verify.sh stop RUN_ID    # kills only this run's PID, or removes its containe
 $V/verify.sh list           # shows any runs still up
 ```
 
-- Never kill by process name. A `hugo server` and a container named `mr4x2-blog-*` are production, and stay untouched.
+- Never kill by process name, and never stop a container by a name pattern. The containers named `mr4x2-blog-*` are production, and stay untouched. Another `hugo server` on this machine may belong to someone else's run.
 - Clean up after every failed attempt too. Evidence stays in `.verify/runs/RUN_ID/` until you delete it on purpose.
 - Restore anything a journey changed in the working tree, such as a fixture `data/reading.json` or a temporary content file, with `git checkout -- <path>` or `git stash`, before you report.
 
