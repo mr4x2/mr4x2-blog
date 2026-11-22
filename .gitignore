@@ -17,3 +17,6 @@ Thumbs.db
 
 # Python
 __pycache__/
+
+# brainstorming companion mockups
+.superpowers/
