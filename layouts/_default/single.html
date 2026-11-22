@@ -15,16 +15,26 @@
     -}}
   </script>
 
-  <article>
+  <article data-pagefind-body>
+    {{ $tags := slice }}
+    {{ range .Params.tags }}
+      {{ $tags = $tags | append (printf "#%s" (. | urlize)) }}
+    {{ end }}
+    <span
+      hidden
+      data-pagefind-meta="date:{{ .Date.Format "2006-01-02" }}"
+    ></span>
+    <span hidden data-pagefind-meta="tags:{{ delimit $tags " " }}"></span>
+
     <header class="article-head">
-      <p class="article-meta">
+      <p class="article-meta" data-pagefind-ignore>
         <time datetime="{{ .Date.Format "2006-01-02" }}"
           >{{ .Date.Format "2006-01-02" }}</time
         >
         · {{ .ReadingTime }} min read
       </p>
       <h1 class="article-title">{{ .Title }}</h1>
-      <ul class="post-tags">
+      <ul class="post-tags" data-pagefind-ignore>
         {{ range .Params.tags }}
           <li><a href="/tags/{{ . | urlize }}/">#{{ . | urlize }}</a></li>
         {{ end }}
@@ -32,11 +42,12 @@
     </header>
 
     {{ if .Fragments.Headings }}
-      <details class="toc" open>
+      <details class="toc" open data-pagefind-ignore>
         <summary class="cmd">$ <b>cat toc</b></summary>
         {{ .TableOfContents }}
       </details>
     {{ end }}
+
 
     <div class="prose">{{ .Content }}</div>
   </article>

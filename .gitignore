@@ -3,6 +3,7 @@ public/
 resources/
 .hugo_build.lock
 assets/jsconfig.json
+static/pagefind/
 
 # Node.js
 node_modules/

@@ -1,10 +1,11 @@
 [
   {"block": ["*main.*.js"]},
+  {"early": "({cls: document.documentElement.className, opacity: ['.who-out', '.sec', '.post', '[data-typed]'].map(s => +getComputedStyle(document.querySelector(s)).opacity)})"},
   {"goto": "/"},
-  {"expect": "document.documentElement.className", "equals": "intro-pending", "label": "the head script set the hidden state"},
-  {"expect": "[+getComputedStyle($('.who-out')).opacity, +getComputedStyle($('.sec')).opacity, +getComputedStyle($('.post')).opacity, +getComputedStyle($('[data-typed]')).opacity]", "equals": [0, 0, 0, 0], "label": "whoami, list and typed word start hidden"},
+  {"wait": "document.documentElement.hasAttribute('data-first-frame')"},
+  {"expect": "JSON.parse(document.documentElement.getAttribute('data-first-frame'))", "equals": {"cls": "intro-pending", "opacity": [0, 0, 0, 0]}, "label": "the head script set the hidden state, and the first frame shows whoami, list and typed word hidden"},
   {"shot": "hidden-state"},
-  {"expect": "new Promise(r => setTimeout(r, 2600, 'waited'))", "equals": "waited"},
-  {"expect": "[+getComputedStyle($('.who-out')).opacity, +getComputedStyle($('.sec')).opacity, +getComputedStyle($('.post')).opacity, +getComputedStyle($('[data-typed]')).opacity]", "equals": [1, 1, 1, 1], "label": "the CSS failsafe shows the text when the script never runs"},
+  {"wait": "[...document.querySelectorAll('.who-out, .sec, .post, [data-typed]')].every(e => +getComputedStyle(e).opacity === 1)", "timeout": 8000, "label": "the CSS failsafe shows the text when the script never runs"},
+  {"expect": "document.documentElement.className", "equals": "intro-pending", "label": "the script really never ran"},
   {"shot": "failsafe"}
 ]

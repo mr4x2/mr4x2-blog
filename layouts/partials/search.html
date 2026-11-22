@@ -1,0 +1,28 @@
+<div class="search" data-search-popup hidden>
+  <div
+    class="search-box"
+    role="dialog"
+    aria-modal="true"
+    aria-label="Search posts"
+  >
+    <div class="search-field">
+      <label class="search-prompt" for="search-input">$ grep -i</label>
+      <input
+        id="search-input"
+        type="text"
+        role="combobox"
+        aria-controls="search-results"
+        aria-autocomplete="list"
+        aria-expanded="false"
+        placeholder="search posts"
+        autocomplete="off"
+        spellcheck="false"
+      />
+    </div>
+    <ul id="search-results" class="search-results" role="listbox"></ul>
+    <p class="search-message" role="status"></p>
+    <p class="search-foot">
+      <span>↑↓ move</span><span>↵ open</span><span>esc close</span>
+    </p>
+  </div>
+</div>

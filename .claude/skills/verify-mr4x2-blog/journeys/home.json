@@ -11,6 +11,8 @@
   {"expect": "!$$('.post a').some(a => /\\/(about|reading)\\//.test(a.href))", "label": "About and Reading are not listed"},
   {"expect": "!$('.pager')", "label": "no pager under one page"},
   {"expect": "$$('.post-thumb img').length", "equals": 2, "label": "a thumbnail per row"},
+  {"expect": "$$('.post').map(p => [...p.classList].join(' '))", "equals": ["post reveal has-thumb", "post reveal has-thumb"], "label": "row classes are separate words"},
+  {"expect": "$$('.post').every(p => p.querySelector('.post-thumb').getBoundingClientRect().left >= p.querySelector('.post-title').getBoundingClientRect().right)", "label": "the thumbnail sits beside the text"},
   {"scroll": ".post-thumb img"},
   {"wait": "$$('.post-thumb img').every(i => i.complete && i.naturalWidth > 0)", "label": "thumbnails load"},
   {"expect": "performance.getEntriesByType('resource').filter(e => e.name.includes('/photos/')).every(e => e.encodedBodySize < 30000)", "label": "thumbnails are resized, not the originals"},

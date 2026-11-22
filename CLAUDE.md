@@ -7,6 +7,7 @@ Personal Hugo blog (mr4x2.com): travel and tech posts in English.
 ## Commands
 
 - `hugo server -D`: local preview at http://localhost:1313.
+- `npm run search`: builds the site into `public/` and writes the Pagefind index to `static/pagefind/` (gitignored). The search popup needs it. Without it the popup says `grep: search index not found`. Run it again after changing a post.
 - `hugo --gc`: build check. This is what CI gates on; there are no tests or linters.
 - `hugo new content <slug>/index.md`: new post from `archetypes/default.md`. It sets title, summary, tags and date; add `image` yourself (see Posts).
 - `npm install && npm run build`: regenerate Tailwind CSS. Run it after adding Tailwind classes that templates didn't use before.
@@ -16,7 +17,11 @@ Personal Hugo blog (mr4x2.com): travel and tech posts in English.
 
 - The theme lives in this repo. `layouts/` holds the templates, edited in place. There is no theme directory or submodule.
 - `assets/css/output.css` is the compiled Tailwind file, committed to the repo. It is what `layouts/partials/head/css.html` loads, and both `npm run build` and `npm run watch` write to it.
-- `public/` and `resources/` are generated build output.
+- `public/` and `resources/` are generated build output. Here `hugo server` also writes into `public/` and can serve a page that an earlier run left there, so delete `public/` before a verification run.
+- The home page is `layouts/index.html`, which renders `partials/home/whoami.html` and `partials/home/posts.html`. The `whoami` line is `params.whoami` in `hugo.toml`. A "who I am" version is one more block, not a rewrite. On the first visit of a session `whoami` types out, driven by classes on `<html>` that `theme-init.js` sets before first paint.
+- Thumbnails on post rows come from the front-matter `image`. `hugo.toml` mounts `static/trip-in-*` at `assets/photos`, so Hugo can resize them to small WebP files. A mount you define replaces Hugo's default mounts for that component, so the defaults are listed again there.
+- Search is Pagefind, pinned to 1.5.0, because 1.6.0 dies with `Illegal instruction` on the server's CPU (no AVX2). `assets/js/search.js` loads `/pagefind/pagefind.js` with a dynamic `import()` on the first open. Only pages with `data-pagefind-body` are indexed: posts and About.
+- The Search and theme buttons need JavaScript, so `.needs-js` hides them until `theme-init.js` has set `data-theme`.
 - Colors, type sizes, durations and easing are tokens at the top of `assets/css/input.css`. `data-theme` on `<html>` switches the color set. `assets/js/theme-init.js` is inlined in `<head>` so the theme is set before first paint, and `assets/js/main.js` is bundled with Hugo's `js.Build`.
 - Code blocks use Chroma classes with two palettes at the end of `assets/css/input.css`, one per `data-theme`. They come from `hugo gen chromastyles --style=github` (light) and `--style=github-dark` (dark), with each selector prefixed by `:root[data-theme="light"]` or `"dark"` and the `.bg`, `.chroma`, line-number and `.hl` rules and `font-weight:bold` dropped.
 - The typography plugin declares `.prose` in `@layer utilities`, so every `.prose` override in `input.css` lives in that layer too.

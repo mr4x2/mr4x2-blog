@@ -1,0 +1,17 @@
+[
+  {"goto": "/"},
+  {"expect": "Promise.all(['/a-great-trip-in-thailand/', '/memorable-days-in-france/', '/about/', '/reading/', '/tags/', '/tags/travel/', '/tags/thailand/', '/tags/france/', '/tags/fossasia/', '/tags/openinfra-submit/', '/index.xml'].map(u => fetch(u).then(r => r.status)))", "equals": [200, 200, 200, 200, 200, 200, 200, 200, 200, 200, 200], "label": "every existing URL still answers 200"},
+  {"expect": "document.querySelector('meta[property=\"og:image\"]').content.endsWith('/images/og-image.png')", "label": "the home page falls back to the default social image"},
+  {"goto": "/about/"},
+  {"expect": "document.querySelector('meta[property=\"og:image\"]').content.endsWith('/images/og-image.png')", "label": "About falls back to the default social image"},
+  {"wait": "!!$('iframe.giscus-frame')", "timeout": 30000, "label": "About's giscus thread loads"},
+  {"scroll": "iframe.giscus-frame"},
+  {"expect": "new Promise(r => setTimeout(r, 4000, 'waited'))", "equals": "waited"},
+  {"shot": "about-comments", "viewport": true},
+  {"goto": "/a-great-trip-in-thailand/"},
+  {"expect": "[$$('.prose a[target=_blank]').length > 0, !!$('.prose iframe[src^=\"https://www.youtube.com/embed/\"]')]", "equals": [true, true], "label": "raw HTML links and the iframe render"},
+  {"expect": "document.querySelector('meta[property=\"og:image\"]').content.endsWith('/trip-in-Thailand/speakers.JPEG')", "label": "a post with an image uses it as the social preview"},
+  {"goto": "/memorable-days-in-france/"},
+  {"expect": "document.querySelector('meta[property=\"og:image\"]').content.endsWith('/trip-in-france/IMG_7498.JPEG')", "label": "the France post uses its own image"},
+  {"expect": "$$('figure figcaption').length > 0 && $$('figure img').every(i => i.getAttribute('src').includes('/trip-in-france/'))", "label": "post images render through the images module with captions"}
+]

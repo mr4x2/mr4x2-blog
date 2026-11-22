@@ -1,6 +1,6 @@
 ---
 name: verify-mr4x2-blog
-description: Drive the mr4x2.com Hugo blog the way a reader or the author would, and capture proof. Covers the web pages (home, posts, tags, the Reading page and its filter), the Raindrop sync CLI, and the production deploy chain (GitHub Actions → Docker Hub → Watchtower). Use it to verify a template, content, CSS, sync or deploy change before you claim it works.
+description: Drive the mr4x2.com Hugo blog the way a reader or the author would, and capture proof. Covers the web pages (home with its typing intro, posts, About, tags, the Reading page, the search popup and the 404 page, in light and dark mode), the slop check, the Raindrop sync CLI, and the production deploy chain (GitHub Actions → Docker Hub → Watchtower). Use it to verify a template, content, CSS, JavaScript, sync or deploy change before you claim it works.
 ---
 
 # Verify the mr4x2 blog
@@ -55,6 +55,9 @@ node $V/drive.mjs --run RUN_ID --name JOURNEY [--no-js] [--dark] [--width 390] s
 | `{"eval": "<js expr>"}` | Record a value. |
 | `{"scroll": {"role": "heading", "name": "…"}}` | Scroll the target into the middle of the viewport, which also triggers lazy images there. |
 | `{"shot": "label"}` / `{"shot": "label", "viewport": true}` / `{"dom": "label"}` | Save a full-page PNG (capped at 4000 px, with `truncatedAt` recorded in `results.json`), a PNG of the viewport only, or the current DOM as HTML. |
+| `{"key": "k", "ctrl": true}` | Press a key through the browser's input path, so the page sees real `keydown` events. Names: a character, `Escape`, `Enter`, `Tab`, `ArrowUp`, `ArrowDown`. Modifiers: `ctrl`, `meta`, `shift`, `alt`. |
+| `{"type": "Bangkok"}` | Type text into the focused element, like a keyboard or an input method would. |
+| `{"hover": target}` / `{"tap": target}` | Move the real mouse to the center of a target, or click it. A `[x, y]` pair works as the target. |
 | `{"media": {"prefers-color-scheme": "dark"}}` | Emulate CSS media features for the rest of the journey (`prefers-color-scheme`, `prefers-reduced-motion`). |
 | `{"block": ["*main.*.js"]}` | Block requests whose URL matches a pattern, for the rest of the journey. Use it to see the page when a script never arrives. |
 | `{"inject": "<js source>"}` | Run a script in the page's own world at the start of every later navigation, for example to spy on a call the page makes. It does not touch the current page. |

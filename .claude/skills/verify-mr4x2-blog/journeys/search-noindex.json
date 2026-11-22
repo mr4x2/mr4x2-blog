@@ -1,0 +1,14 @@
+[
+  {"goto": "/"},
+  {"wait": "!document.documentElement.className.includes('intro')"},
+  {"expect": "$('[data-search-popup]').hidden", "label": "the popup starts closed"},
+  {"key": "k", "ctrl": true},
+  {"expect": "!$('[data-search-popup]').hidden", "label": "ctrl+K opens it"},
+  {"wait": "$('[role=status]') && $('[data-search-popup] [role=status]').textContent === 'grep: search index not found'", "label": "a missing index is reported"},
+  {"shot": "search-noindex"},
+  {"text": "search-noindex"},
+  {"type": "bangkok"},
+  {"expect": "[$('[data-search-popup] [role=status]').textContent, $$('[role=option]').length]", "equals": ["grep: search index not found", 0], "label": "typing changes nothing while the index is missing"},
+  {"key": "Escape"},
+  {"expect": "$('[data-search-popup]').hidden", "label": "Esc closes it"}
+]

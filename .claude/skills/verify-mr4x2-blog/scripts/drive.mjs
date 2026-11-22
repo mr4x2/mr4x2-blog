@@ -122,6 +122,7 @@ async function evaluate(expr, tries = 20) {
   }
 }
 const T = (t) => JSON.stringify(t);
+const KEYS = { Escape: 27, Enter: 13, Tab: 9, ArrowUp: 38, ArrowDown: 40, "/": 191 };
 const FULL_MAX = 4000;
 
 // The same patterns as CLAUDE.md "Avoid slop", applied to what the theme rendered. Post bodies, post rows,
@@ -190,6 +191,26 @@ for (const s of steps) {
       const shot = await send("Page.captureScreenshot", { format: "png" });
       if (h !== height) await resize(height);
       const f = join(out, `${String(n).padStart(2, "0")}-${label(s, s.shot)}.png`); writeFileSync(f, Buffer.from(shot.data, "base64")); rec.result = f;
+    } else if (s.key !== undefined) {
+      const vk = KEYS[s.key] ?? s.key.toUpperCase().charCodeAt(0);
+      const mods = (s.alt ? 1 : 0) | (s.ctrl ? 2 : 0) | (s.meta ? 4 : 0) | (s.shift ? 8 : 0);
+      const printable = s.key.length === 1 && !s.ctrl && !s.meta;
+      const ev = { key: s.key, code: s.key.length === 1 && /[a-z]/i.test(s.key) ? `Key${s.key.toUpperCase()}` : s.key === "/" ? "Slash" : s.key, windowsVirtualKeyCode: vk, modifiers: mods };
+      await send("Input.dispatchKeyEvent", { type: printable ? "keyDown" : "rawKeyDown", ...ev, ...(printable ? { text: s.key } : {}) });
+      await send("Input.dispatchKeyEvent", { type: "keyUp", ...ev });
+      rec.result = s.key;
+    } else if (s.type !== undefined) {
+      await send("Input.insertText", { text: s.type });
+      rec.result = s.type;
+    } else if (s.hover !== undefined || s.tap !== undefined) {
+      const at = s.hover !== undefined ? s.hover : s.tap;
+      const [x, y] = Array.isArray(at) ? at : await evaluate(`(() => { const el = $(${T(at)}); if (!el) throw new Error('not found: ' + ${T(T(at))}); const r = el.getBoundingClientRect(); return [r.left + r.width / 2, r.top + r.height / 2]; })()`);
+      await send("Input.dispatchMouseEvent", { type: "mouseMoved", x, y });
+      if (s.tap !== undefined) {
+        await send("Input.dispatchMouseEvent", { type: "mousePressed", x, y, button: "left", clickCount: 1 });
+        await send("Input.dispatchMouseEvent", { type: "mouseReleased", x, y, button: "left", clickCount: 1 });
+      }
+      rec.result = [Math.round(x), Math.round(y)];
     } else if (s.media !== undefined) {
       const features = Object.entries(s.media).map(([name, value]) => ({ name, value }));
       await send("Emulation.setEmulatedMedia", { features });
