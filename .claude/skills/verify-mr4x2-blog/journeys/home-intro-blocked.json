@@ -1,0 +1,10 @@
+[
+  {"block": ["*main.*.js"]},
+  {"goto": "/"},
+  {"expect": "document.documentElement.className", "equals": "intro-pending", "label": "the head script set the hidden state"},
+  {"expect": "[+getComputedStyle($('.who-out')).opacity, +getComputedStyle($('.sec')).opacity, +getComputedStyle($('.post')).opacity, +getComputedStyle($('[data-typed]')).opacity]", "equals": [0, 0, 0, 0], "label": "whoami, list and typed word start hidden"},
+  {"shot": "hidden-state"},
+  {"expect": "new Promise(r => setTimeout(r, 2600, 'waited'))", "equals": "waited"},
+  {"expect": "[+getComputedStyle($('.who-out')).opacity, +getComputedStyle($('.sec')).opacity, +getComputedStyle($('.post')).opacity, +getComputedStyle($('[data-typed]')).opacity]", "equals": [1, 1, 1, 1], "label": "the CSS failsafe shows the text when the script never runs"},
+  {"shot": "failsafe"}
+]

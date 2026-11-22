@@ -41,7 +41,7 @@ This is read-only. It checks that the process or container belongs to this run, 
 Pages are driven with `drive.mjs`. Steps are JSON objects, and the run stops at nothing: every step is recorded.
 
 ```bash
-node $V/drive.mjs --run RUN_ID --name JOURNEY [--no-js] [--width 390] steps.json   # or `-` to read the steps from stdin
+node $V/drive.mjs --run RUN_ID --name JOURNEY [--no-js] [--dark] [--width 390] steps.json   # or `-` to read the steps from stdin
 ```
 
 | Step | Effect |
@@ -54,7 +54,8 @@ node $V/drive.mjs --run RUN_ID --name JOURNEY [--no-js] [--width 390] steps.json
 | `{"eval": "<js expr>"}` | Record a value. |
 | `{"scroll": {"role": "heading", "name": "…"}}` | Scroll the target into the middle of the viewport, which also triggers lazy images there. |
 | `{"shot": "label"}` / `{"shot": "label", "viewport": true}` / `{"dom": "label"}` | Save a full-page PNG (capped at 4000 px, with `truncatedAt` recorded in `results.json`), a PNG of the viewport only, or the current DOM as HTML. |
-| `{"media": {"prefers-color-scheme": "dark"}}` | Emulate CSS media features for the rest of the journey (`prefers-color-scheme`, `prefers-reduced-motion`). Headless Chromium delivers a media-query change only when a frame runs, so follow it with a nested `requestAnimationFrame` wait. |
+| `{"media": {"prefers-color-scheme": "dark"}}` | Emulate CSS media features for the rest of the journey (`prefers-color-scheme`, `prefers-reduced-motion`). |
+| `{"block": ["*main.*.js"]}` | Block requests whose URL matches a pattern, for the rest of the journey. Use it to see the page when a script never arrives. |
 | `{"early": "<js expr>"}` | Arm a probe for the next navigation. In its first frame the page stores the JSON of the expression in `data-first-frame` on `<html>`, so an `expect` can prove what the first paint looked like. |
 | `{"text": "label"}` | Save the theme's visible text as `NN-label.rendered.txt` and fail the step on any slop pattern in it. See Slop check. |
 
@@ -104,7 +105,7 @@ $V/verify.sh list           # shows any runs still up
 ## Helpers
 
 - `scripts/verify.sh launch [local|prod] | doctor RUN_ID | stop RUN_ID | list`
-- `scripts/drive.mjs --run RUN_ID --name JOURNEY [--no-js] [--width N] [--height N] STEPS.json|-`
+- `scripts/drive.mjs --run RUN_ID --name JOURNEY [--no-js] [--dark] [--width N] [--height N] STEPS.json|-`
 - `scripts/slop-check.sh` runs the CLAUDE.md "Avoid slop" grep.
 
 Both are executable and dependency-free: bash, curl, python3, Node ≥ 22 for the built-in WebSocket, Docker for `prod` mode, and a cached Playwright Chromium.

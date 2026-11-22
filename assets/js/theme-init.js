@@ -10,4 +10,12 @@
   root.dataset.theme = dark ? "dark" : "light";
   document.querySelector('meta[name="color-scheme"]').content =
     root.dataset.theme;
+  try {
+    if (
+      root.hasAttribute("data-intro") &&
+      !sessionStorage.getItem("mk-intro-seen")
+    ) {
+      root.classList.add("intro-pending");
+    }
+  } catch (e) {}
 })();

@@ -1,7 +1,8 @@
 ---
 title: "About Me"
 summary: "Welcome to my profile! I'm a passionate developer who loves exploring new technologies and building innovative solutions."
-tags: ["readme", "info"]
+build:
+  list: never
 date: "2025-03-12T02:25:00+09:00"
 ---
 

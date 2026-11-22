@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// usage: drive.mjs --run RUN_ID --name JOURNEY [--no-js] [--width 1280] [--height 900] STEPS.json|-
+// usage: drive.mjs --run RUN_ID --name JOURNEY [--no-js] [--dark] [--width 1280] [--height 900] STEPS.json|-
 import { spawn } from "node:child_process";
 import { readFileSync, writeFileSync, appendFileSync, mkdirSync, existsSync, readdirSync, rmSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
@@ -9,7 +9,7 @@ import { fileURLToPath } from "node:url";
 const args = process.argv.slice(2);
 const opt = (k, d) => { const i = args.indexOf(k); return i >= 0 ? args.splice(i, 2)[1] : d; };
 const flag = (k) => { const i = args.indexOf(k); return i >= 0 ? (args.splice(i, 1), true) : false; };
-const run = opt("--run"), name = opt("--name"), noJs = flag("--no-js");
+const run = opt("--run"), name = opt("--name"), noJs = flag("--no-js"), dark = flag("--dark");
 const width = +opt("--width", 1280), height = +opt("--height", 900);
 const stepsArg = args[0];
 if (!run || !name || !stepsArg) { console.error("usage: drive.mjs --run RUN_ID --name JOURNEY [--no-js] STEPS.json|-"); process.exit(2); }
@@ -67,6 +67,7 @@ listeners.push((m) => {
 const { targetId } = await send("Target.createTarget", { url: "about:blank" });
 ({ sessionId: session } = await send("Target.attachToTarget", { targetId, flatten: true }));
 await send("Page.enable"); await send("Runtime.enable");
+
 // A real window smaller than the emulated viewport makes captures tile.
 let windowId, frameH = 0;
 {
@@ -81,6 +82,9 @@ let windowId, frameH = 0;
   frameH = (await send("Browser.getWindowBounds", { windowId })).bounds.height - height;
 }
 await send("Emulation.setDeviceMetricsOverride", { width, height, deviceScaleFactor: 1, mobile: width < 600 });
+// Headless Chromium draws no frames until the first capture, so transitions, rAF and media-query events stall without this.
+await send("Page.captureScreenshot", { format: "png" });
+if (dark) await send("Emulation.setEmulatedMedia", { features: [{ name: "prefers-color-scheme", value: "dark" }] });
 if (noJs) await send("Emulation.setScriptExecutionDisabled", { value: true });
 
 // In-page helpers, evaluated in an isolated world so they work with page JS disabled.
@@ -141,7 +145,7 @@ const READ_THEME_TEXT = `(() => {
   return { visibleText: lines.join('\\n'), attributeText: attrs.join('\\n') };
 })()`;
 const PLANT_SLOP = `(() => { const s = document.createElement('span'); s.textContent = 'Coming soon \\u{1F389}'; document.querySelector('header').append(s); })()`;
-const results = []; let n = 0; let failed = false;
+const results = []; let n = 0; let failed = false; let earlyId;
 const label = (s, d) => String(s.label || d).replace(/[^a-z0-9-]+/gi, "-").slice(0, 40);
 
 for (const s of steps) {
@@ -189,9 +193,14 @@ for (const s of steps) {
       const features = Object.entries(s.media).map(([name, value]) => ({ name, value }));
       await send("Emulation.setEmulatedMedia", { features });
       rec.result = features;
+    } else if (s.block !== undefined) {
+      await send("Network.enable");
+      await send("Network.setBlockedURLs", { urls: s.block });
+      rec.result = s.block;
     } else if (s.early !== undefined) {
-      const source = `requestAnimationFrame(() => { const r = document.documentElement; if (!r.hasAttribute("data-first-frame")) r.setAttribute("data-first-frame", JSON.stringify(${s.early})); });`;
-      await send("Page.addScriptToEvaluateOnNewDocument", { source });
+      const source = `(function probe() { requestAnimationFrame(() => { const r = document.documentElement; try { r.setAttribute("data-first-frame", JSON.stringify(${s.early})); } catch { probe(); } }); })();`;
+      if (earlyId) await send("Page.removeScriptToEvaluateOnNewDocument", { identifier: earlyId });
+      earlyId = (await send("Page.addScriptToEvaluateOnNewDocument", { source })).identifier;
       rec.result = "armed";
     } else if (s.text !== undefined) {
       if (plant) await evaluate(PLANT_SLOP);

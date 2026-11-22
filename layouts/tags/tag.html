@@ -9,7 +9,7 @@
 
       <ul class="divide-y divide-gray-200">
         {{ range .Pages }}
-          {{ partial "post-summary.html" . }}
+          {{ partial "post-summary.html" (dict "post" .) }}
         {{ end }}
       </ul>
     </div>

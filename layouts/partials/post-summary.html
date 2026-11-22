@@ -1,49 +1,42 @@
-<li class="py-12 first:pt-0">
-  <article>
-    <div class="space-y-8">
-      <div class="space-y-4">
-        <div class="flex flex-col gap-4 text-sm text-gray-500">
-          {{ $dateMachine := .Date | time.Format "2006-01-02T15:04:05-07:00" }}
-          {{ $dateHuman := .Date | time.Format ":date_long" }}
-          <time datetime="{{ $dateMachine }}">{{ $dateHuman }}</time>
-
-          <h2 class="text-2xl font-semibold text-gray-900">
-            <a class="break-words" href="{{ .Permalink }}">{{ .Title }}</a>
-          </h2>
-
-          <div class="flex flex-wrap gap-2">
-            {{ range .Params.tags }}
-              <a
-                href="/tags/{{ . | urlize }}"
-                class="mr-3 text-sm font-normal uppercase text-indigo-500 hover:text-indigo-600"
-                >{{ . }}</a
-              >
-            {{ end }}
-          </div>
-        </div>
-
-        <div class="text-gray-600 line-clamp-3">{{ .Summary }}</div>
-      </div>
-
-      <a
-        href="{{ .Permalink }}"
-        class="group inline-flex items-center text-sm text-gray-600 transition-colors hover:text-gray-900"
-        >Read Article<svg
-          xmlns="http://www.w3.org/2000/svg"
-          width="24"
-          height="24"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          stroke-width="2"
-          stroke-linecap="round"
-          stroke-linejoin="round"
-          class="ml-1 h-4 w-4 transition-transform group-hover:translate-x-0.5"
-        >
-          <path d="M5 12h14"></path>
-          <path d="m12 5 7 7-7 7"></path>
-        </svg>
-      </a>
-    </div>
-  </article>
+{{ $thumb := "" }}
+{{ with .post.Params.image }}
+  {{ with resources.Get (printf "photos/%s" (index . 0)) }}
+    {{ $thumb = .Fill "280x175 q75 webp" }}
+  {{ end }}
+{{ end }}
+<li
+  class="post reveal{{ if $thumb }} has-thumb{{ end }}"
+  {{ with .i }}style="--i: {{ . }}"{{ end }}
+>
+  <div>
+    <time class="post-date" datetime="{{ .post.Date.Format "2006-01-02" }}"
+      >{{ .post.Date.Format "2006-01-02" }}</time
+    >
+    <h2 class="post-title">
+      <a href="{{ .post.RelPermalink }}">{{ .post.Title }}</a>
+    </h2>
+    <p class="post-sum">{{ .post.Summary | plainify }}</p>
+    <ul class="post-tags">
+      {{ range .post.Params.tags }}
+        <li><a href="/tags/{{ . | urlize }}/">#{{ . | urlize }}</a></li>
+      {{ end }}
+    </ul>
+  </div>
+  {{ with $thumb }}
+    <a
+      class="post-thumb"
+      href="{{ $.post.RelPermalink }}"
+      tabindex="-1"
+      aria-hidden="true"
+    >
+      <img
+        src="{{ .RelPermalink }}"
+        width="{{ .Width }}"
+        height="{{ .Height }}"
+        alt=""
+        loading="lazy"
+        decoding="async"
+      />
+    </a>
+  {{ end }}
 </li>

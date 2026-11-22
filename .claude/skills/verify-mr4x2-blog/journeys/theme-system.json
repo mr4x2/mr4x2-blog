@@ -3,12 +3,11 @@
   {"goto": "/"},
   {"expect": "[document.documentElement.dataset.theme, localStorage.getItem('mk-theme')]", "equals": ["dark", null], "label": "no saved choice follows the system"},
   {"media": {"prefers-color-scheme": "light"}},
-  {"wait": "new Promise(r => requestAnimationFrame(() => requestAnimationFrame(() => r(document.documentElement.dataset.theme === 'light'))))", "label": "follows a live system change"},
+  {"wait": "document.documentElement.dataset.theme === 'light'", "label": "follows a live system change"},
   {"click": {"role": "button", "name": "Toggle dark mode"}, "label": "reader picks dark"},
   {"expect": "[document.documentElement.dataset.theme, localStorage.getItem('mk-theme')]", "equals": ["dark", "dark"]},
   {"media": {"prefers-color-scheme": "dark"}},
   {"media": {"prefers-color-scheme": "light"}},
-  {"eval": "new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r)))", "label": "let a frame deliver the change"},
-  {"expect": "document.documentElement.dataset.theme", "equals": "dark", "label": "a saved choice ignores the system"},
+  {"expect": "new Promise(r => setTimeout(() => r(document.documentElement.dataset.theme), 300))", "equals": "dark", "label": "a saved choice ignores the system"},
   {"shot": "saved-dark-over-light-system"}
 ]

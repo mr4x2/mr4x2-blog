@@ -2,6 +2,7 @@
 <html
   lang="{{ site.Language.LanguageCode }}"
   dir="{{ or site.Language.LanguageDirection `ltr` }}"
+  {{ if .IsHome }}data-intro{{ end }}
 >
   <head>
     {{ partial "head.html" . }}

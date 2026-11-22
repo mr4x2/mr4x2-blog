@@ -5,6 +5,7 @@ title = 'mr4x2 blog'  # Title of your website
 [params]
   github = 'https://github.com/mr4x2'
   username = 'mr4x2'
+  whoami = '**mr8**: Ceph object storage engineer, OpenInfra Europe 2025 speaker. I write about trips and tech, in English, to get better at it.'
 
   # To enable giscus, the GitHub-discussions-based comment section,
   # input the repository for the discussions below. For more details, see
@@ -66,5 +67,15 @@ title = 'mr4x2 blog'  # Title of your website
   weight = 4
 
 [module]
+  [[module.mounts]]
+    source = 'static'
+    target = 'static'
+  [[module.mounts]]
+    source = 'assets'
+    target = 'assets'
+  [[module.mounts]]
+    source = 'static'
+    target = 'assets/photos'
+    includeFiles = ['/trip-in-*/**']
   [[module.imports]]
     path = 'github.com/hugomods/images'

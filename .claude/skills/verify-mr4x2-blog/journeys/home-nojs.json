@@ -1,0 +1,12 @@
+[
+  {"goto": "/"},
+  {"expect": "document.documentElement.className", "equals": "", "label": "no hidden-state class without JavaScript"},
+  {"expect": "[+getComputedStyle($('.who-out')).opacity, ...$$('.post').map(p => +getComputedStyle(p).opacity)]", "equals": [1, 1, 1], "label": "all text is shown"},
+  {"expect": "$('.who-out').textContent.trim().startsWith('mr8: Ceph object storage engineer')", "label": "whoami line"},
+  {"expect": "$('.who .cmd').textContent.replace(/\\s+/g, ' ').trim()", "equals": "$ whoami"},
+  {"expect": "$$('header nav a').map(a => visible(a))", "equals": [true, true, true, true], "label": "header links"},
+  {"expect": "$$('header button').filter(visible).length", "equals": 0, "label": "script-only buttons are hidden"},
+  {"click": {"role": "link", "name": "reading/"}, "label": "header link works"},
+  {"wait": "location.pathname === '/reading/'"},
+  {"shot": "nojs"}
+]

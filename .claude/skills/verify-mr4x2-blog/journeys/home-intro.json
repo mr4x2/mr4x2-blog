@@ -1,0 +1,11 @@
+[
+  {"goto": "/"},
+  {"expect": "new Promise(done => { const root = document.documentElement, typed = $('[data-typed]'), log = []; const t = setInterval(() => { log.push({ cls: root.className, typed: typed.textContent, who: +getComputedStyle($('.who-out')).opacity, sec: +getComputedStyle($('.sec')).opacity }); if (log.length >= 24) { clearInterval(t); const typing = log.filter(s => s.cls === 'intro-typing'); const lens = typing.map(s => s.typed.length); done({ typedWhileTyping: typing.length > 0, grows: lens.every((n, i) => i === 0 || n >= lens[i - 1]), whoHiddenWhileTyping: typing.every(s => s.who < 0.05), listShownWhileTyping: typing.every(s => s.sec > 0), end: log[log.length - 1] }); } }, 50); })", "equals": {"typedWhileTyping": true, "grows": true, "whoHiddenWhileTyping": true, "listShownWhileTyping": true, "end": {"cls": "", "typed": "whoami", "who": 1, "sec": 1}}, "label": "whoami types while the list is already fading in"},
+  {"expect": "sessionStorage.getItem('mk-intro-seen')", "equals": "1", "label": "marked as played"},
+  {"shot": "after-intro"},
+  {"text": "after-intro"},
+  {"early": "({cls: document.documentElement.className, who: getComputedStyle(document.querySelector('.who-out')).opacity, post: getComputedStyle(document.querySelector('.post')).opacity, typed: getComputedStyle(document.querySelector('[data-typed]')).opacity})"},
+  {"goto": "/"},
+  {"wait": "document.documentElement.hasAttribute('data-first-frame')"},
+  {"expect": "JSON.parse(document.documentElement.getAttribute('data-first-frame'))", "equals": {"cls": "", "who": "1", "post": "1", "typed": "1"}, "label": "later visit in the session shows everything at once"}
+]
