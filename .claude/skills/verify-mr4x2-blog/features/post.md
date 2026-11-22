@@ -1,41 +1,52 @@
 # Post page
 
-A Post page shows the publish date, title, author, a collapsible "Table of Contents", the body with centered photos and their captions, the Post tags, a comments section (giscus) and "← Back to the list".
+A Post page shows the date and reading time in monospace (`2025-03-29 · 3 min read`), the title, the tags (`#travel`), a `$ cat toc` table of contents that is open by default, the body with centered photos and their captions, links to the older and the newer Post, `cd ~`, and comments (giscus) in the site theme. About is a plain page: title, text and comments, with no date, tags, table of contents or older and newer links.
 
 ## Sub-features
 
-- `post-header` shows the date and title, and the author `mr4x2` with their GitHub avatar.
-- `post-toc` shows "Table of Contents", open by default, with links to the H2/H3 headings that jump to them.
+- `post-header` shows `YYYY-MM-DD · N min read`, the title and the tags, each tag linking to `/tags/<tag>/`.
+- `post-toc` shows `$ cat toc`, open by default, with links that jump to the headings. A heading stops below the sticky header.
 - `post-figures` renders `![alt](path#center "Caption")` as a centered figure whose caption is the title text.
-- `post-tags` shows each tag linking to `/tags/<tag>`.
-- `post-comments` loads the giscus script for comments.
-- `post-back` makes "← Back to the list" return to `/`.
+- `post-code` colors code blocks with the Chroma palette of the active theme.
+- `post-nav` links to the older and the newer Post, and `cd ~` returns to `/`.
+- `post-comments` loads giscus with the site theme, maps the thread by pathname, and sends giscus the new theme when the reader toggles it.
+- `post-preview` uses the front-matter `image` for the social preview and the JSON-LD `image`, and falls back to `images/og-image.png`.
+- `about-page` renders About as a plain page that keeps its giscus thread (`/about/`, 2 comments today).
 
 ## How to get to it (user POV)
 
-- Click a Post title or "Read Article" on the home page.
-- Click a Post title on a tag page.
+- Click a Post title on the home page or a tag page.
+- Click `newer` or `older` at the bottom of a Post.
 - Follow a link to `/<slug>/` from outside.
+- Click `about/` in the header for About.
 
 ## Driving it with drive.mjs
 
 Preconditions:
 
 - A run is healthy per `doctor`.
-- The Post `A great trip in Thailand` exists at `/a-great-trip-in-thailand/`.
+- The Posts `A great trip in Thailand` (`/a-great-trip-in-thailand/`) and `Memorable days in France` exist.
 
-- **Open from home.** `{"goto": "/"}`, `{"click": {"role": "link", "name": "A great trip in Thailand"}}`, `{"wait": "location.pathname === '/a-great-trip-in-thailand/'"}`, `{"shot": "post"}`.
-- **Header.** `{"expect": "$('h1').textContent.trim()", "equals": "A great trip in Thailand"}`.
-- **TOC.** `{"expect": "$('details').open && $$('details nav a').length > 0"}`. Clicking the first TOC link changes `location.hash` to that heading's id.
-- **Figures.** `{"expect": "$$('figure figcaption').map(f => f.textContent.trim()).slice(0, 2)", "equals": ["Canals in Bangkok", "Pad Thai"]}`. Then check that a photo actually loads where a reader scrolls: `{"scroll": "img[title='Pad Thai']"}`, `{"wait": "(i => i.complete && i.naturalWidth > 0)($(\"img[title='Pad Thai']\"))", "timeout": 15000, "label": "photo loads"}`, `{"shot": "figure", "viewport": true}`.
-- **Tags.** `{"expect": "$$('footer a[href^=\"/tags/\"]').map(a => a.textContent.trim().toLowerCase())"}` includes `travel` and `thailand`.
-- **Comments.** `{"expect": "!!$('script[src=\"https://giscus.app/client.js\"]')"}`. Don't assert that the comment thread itself rendered (see Gotchas).
-- **Back.** `{"click": {"role": "link", "name": "← Back to the list"}}`, `{"wait": "location.pathname === '/'"}`.
-- **Proof.** `{"shot": "post-final"}` and `{"dom": "post"}`.
+```bash
+K=.claude/skills/verify-mr4x2-blog
+node $K/scripts/drive.mjs --run RUN_ID --name post $K/journeys/post.json
+node $K/scripts/drive.mjs --run RUN_ID --name post-dark --dark $K/journeys/post.json
+node $K/scripts/drive.mjs --run RUN_ID --name post-phone --width 390 --height 844 $K/journeys/post.json
+node $K/scripts/drive.mjs --run RUN_ID --name about $K/journeys/about.json
+node $K/scripts/drive.mjs --run RUN_ID --name post-giscus $K/journeys/post-giscus.json
+```
+
+- **`post.json`** opens the Thailand Post from the list and checks the date and reading time, title, tags, the open `$ cat toc`, and that the first TOC link lands the heading below the header. It checks the two captions (`Canals in Bangkok`, `Pad Thai`), that a `#center` image is centered, that a photo loads where the reader scrolls, that the page does not scroll sideways (the YouTube iframe is 560 px wide in the Markdown), the JSON-LD and `og:image` image, and the giscus script's theme, mapping and repo. It injects a code block to check both Chroma palettes, then follows `newer`, `older` and `cd ~`. Run it with `--dark` and `--width 390` too.
+- **`about.json`** opens About from the menu, checks that it has no date, TOC, tags or older and newer links, that the text renders, and that giscus keeps the pathname mapping.
+- **`post-giscus.json`** needs the network. It waits for the real giscus iframe, checks that its `theme` query is the site theme, toggles the theme, and checks that the page posted `{giscus: {setConfig: {theme}}}` to `https://giscus.app`. Its two screenshots show the comments before and after. Report it as skipped, with the reason, when giscus.app is unreachable.
+- **Proof.** Keep `post-top`, `post-figure`, `post-code`, `giscus-before` and `giscus-after`.
 
 ## Gotchas
 
-- giscus loads from github.com/giscus.app and maps threads by pathname. On a `127.0.0.1` run, the thread doesn't match production, so only the script tag is proof.
+- giscus maps threads by pathname, so a `127.0.0.1` run shows the real thread of the same path.
 - Photos come from `static/trip-in-<place>/`, are big (up to 1.6 MB) and use `loading="lazy"`. Photos below the fold never load until scrolled to, so `every(img.complete)` over the whole page is false by design. Scroll to the one you check.
-- The Thailand post is about 10,900 px tall. A full-page `shot` stops at 4000 px. Use `scroll` plus a viewport shot for anything lower down.
-- Image URLs carry a `?v=<hash>#center` suffix added by the `hugomods/images` module. Match on the path, not the full URL.
+- Image URLs carry a `?v=<hash>#center` suffix added by the `hugomods/images` module. Match on the path, not the full URL. The module's own classes (`figure`, `d-block`) have no CSS here, so `.prose figure` in `input.css` does the centering. Do not rely on a Tailwind class for it.
+- The Markdown has no code block, so `post.json` injects one. A real code block uses the same `.chroma` classes.
+- Check sideways scroll against `VW`, the width the driver emulates, never `screen.width` at desktop width.
+- The `.prose` overrides live in `@layer utilities` in `input.css`, because the typography plugin declares `.prose` there. A `.prose` rule in `components` is silently ignored.
+- A full-page `shot` of the Thailand Post stops at 4000 px. Use `scroll` plus a viewport shot for anything lower.

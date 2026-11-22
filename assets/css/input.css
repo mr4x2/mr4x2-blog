@@ -96,7 +96,8 @@
   --fs-body: 1rem;
   --fs-lg: 1.0625rem;
   --fs-xl: 1.1875rem;
-  --fs-2xl: 1.75rem;
+  --fs-2xl: 1.375rem;
+  --fs-3xl: 1.75rem;
 
   --dur-hover: 150ms;
   --dur-press: 160ms;
@@ -489,3 +490,286 @@
     }
   }
 }
+
+@layer components {
+  .article-head {
+    padding: 2.75rem 0 1.5rem;
+  }
+  .article-meta {
+    font-family: var(--font-mono);
+    font-size: var(--fs-xs);
+    color: var(--muted);
+  }
+  .article-title {
+    margin: 0.375rem 0 0.75rem;
+    font-size: var(--fs-3xl);
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    line-height: 1.25;
+  }
+
+  .toc {
+    margin-bottom: 1.75rem;
+    padding: 0.75rem 0;
+    border-block: 1px dashed var(--line);
+  }
+  .toc summary {
+    cursor: pointer;
+  }
+  .toc ol {
+    margin: 0.5rem 0 0;
+    padding-left: 1.25rem;
+    font-size: var(--fs-sm);
+    color: var(--muted);
+  }
+  .toc ol ol {
+    margin: 0;
+  }
+  @media (hover: hover) and (pointer: fine) {
+    .toc a {
+      transition: color var(--dur-hover) ease;
+    }
+    .toc a:hover {
+      color: var(--accent);
+    }
+  }
+
+  .article-nav {
+    display: flex;
+    justify-content: space-between;
+    gap: 1.5rem;
+    margin-top: 2.5rem;
+    padding-top: 1.25rem;
+    border-top: 1px dashed var(--line);
+  }
+  .article-nav a {
+    display: flex;
+    flex-direction: column;
+    max-width: 18rem;
+    font-weight: 600;
+  }
+  .article-nav-newer {
+    margin-left: auto;
+    text-align: right;
+  }
+  .article-nav-label {
+    font-family: var(--font-mono);
+    font-size: var(--fs-xs);
+    font-weight: 400;
+    color: var(--accent);
+  }
+  .article-home {
+    margin-top: 1.5rem;
+  }
+  .article-home a {
+    color: var(--accent);
+  }
+  .comments {
+    margin-top: 3rem;
+  }
+}
+
+@layer utilities {
+  /* The typography plugin declares .prose in this layer, so overrides must live here to win. */
+  :root .prose {
+    --tw-prose-body: var(--ink);
+    --tw-prose-headings: var(--ink);
+    --tw-prose-lead: var(--muted);
+    --tw-prose-links: var(--accent);
+    --tw-prose-bold: var(--ink);
+    --tw-prose-counters: var(--muted);
+    --tw-prose-bullets: var(--faint);
+    --tw-prose-hr: var(--line);
+    --tw-prose-quotes: var(--ink);
+    --tw-prose-quote-borders: var(--line);
+    --tw-prose-captions: var(--muted);
+    --tw-prose-kbd: var(--ink);
+    --tw-prose-kbd-shadows: var(--ink);
+    --tw-prose-code: var(--ink);
+    --tw-prose-pre-code: var(--ink);
+    --tw-prose-pre-bg: var(--surface);
+    --tw-prose-th-borders: var(--line);
+    --tw-prose-td-borders: var(--line);
+    max-width: 68ch;
+    font-size: var(--fs-lg);
+    line-height: 1.7;
+  }
+  .prose h1 {
+    font-size: var(--fs-3xl);
+    font-weight: 600;
+  }
+  .prose h2 {
+    font-size: var(--fs-2xl);
+    font-weight: 600;
+    scroll-margin-top: calc(var(--header-h) + 1rem);
+  }
+  .prose h3 {
+    font-size: var(--fs-xl);
+    font-weight: 600;
+    scroll-margin-top: calc(var(--header-h) + 1rem);
+  }
+  .prose h4 {
+    font-size: var(--fs-lg);
+    font-weight: 600;
+    scroll-margin-top: calc(var(--header-h) + 1rem);
+  }
+  .prose a {
+    font-weight: 400;
+    text-decoration-line: underline;
+    text-underline-offset: 0.2em;
+  }
+  .prose strong {
+    font-weight: 600;
+  }
+  .prose code,
+  .prose kbd {
+    font-weight: 400;
+  }
+  .prose pre {
+    border: 1px solid var(--line);
+    font-size: var(--fs-sm);
+  }
+  .prose figure {
+    text-align: center;
+  }
+  .prose figure img {
+    margin-inline: auto;
+  }
+  .prose figcaption {
+    font-size: var(--fs-sm);
+  }
+  .prose iframe {
+    max-width: 100%;
+    height: auto;
+    aspect-ratio: 16 / 9;
+  }
+}
+
+/* hugo gen chromastyles --style=github */
+:root[data-theme="light"] .chroma .err { color:#f6f8fa;background-color:#82071e}
+:root[data-theme="light"] .chroma .line { display:flex;}
+:root[data-theme="light"] .chroma .k { color:#cf222e}
+:root[data-theme="light"] .chroma .kc { color:#cf222e}
+:root[data-theme="light"] .chroma .kd { color:#cf222e}
+:root[data-theme="light"] .chroma .kn { color:#cf222e}
+:root[data-theme="light"] .chroma .kp { color:#cf222e}
+:root[data-theme="light"] .chroma .kr { color:#cf222e}
+:root[data-theme="light"] .chroma .kt { color:#cf222e}
+:root[data-theme="light"] .chroma .na { color:#1f2328}
+:root[data-theme="light"] .chroma .nb { color:#6639ba}
+:root[data-theme="light"] .chroma .bp { color:#6a737d}
+:root[data-theme="light"] .chroma .nc { color:#1f2328}
+:root[data-theme="light"] .chroma .no { color:#0550ae}
+:root[data-theme="light"] .chroma .nd { color:#0550ae}
+:root[data-theme="light"] .chroma .ni { color:#6639ba}
+:root[data-theme="light"] .chroma .nf { color:#6639ba}
+:root[data-theme="light"] .chroma .nl { color:#900}
+:root[data-theme="light"] .chroma .nn { color:#24292e}
+:root[data-theme="light"] .chroma .nx { color:#1f2328}
+:root[data-theme="light"] .chroma .nt { color:#0550ae}
+:root[data-theme="light"] .chroma .nv { color:#953800}
+:root[data-theme="light"] .chroma .vc { color:#953800}
+:root[data-theme="light"] .chroma .vg { color:#953800}
+:root[data-theme="light"] .chroma .vi { color:#953800}
+:root[data-theme="light"] .chroma .s { color:#0a3069}
+:root[data-theme="light"] .chroma .sa { color:#0a3069}
+:root[data-theme="light"] .chroma .sb { color:#0a3069}
+:root[data-theme="light"] .chroma .sc { color:#0a3069}
+:root[data-theme="light"] .chroma .dl { color:#0a3069}
+:root[data-theme="light"] .chroma .sd { color:#0a3069}
+:root[data-theme="light"] .chroma .s2 { color:#0a3069}
+:root[data-theme="light"] .chroma .se { color:#0a3069}
+:root[data-theme="light"] .chroma .sh { color:#0a3069}
+:root[data-theme="light"] .chroma .si { color:#0a3069}
+:root[data-theme="light"] .chroma .sx { color:#0a3069}
+:root[data-theme="light"] .chroma .sr { color:#0a3069}
+:root[data-theme="light"] .chroma .s1 { color:#0a3069}
+:root[data-theme="light"] .chroma .ss { color:#032f62}
+:root[data-theme="light"] .chroma .m { color:#0550ae}
+:root[data-theme="light"] .chroma .mb { color:#0550ae}
+:root[data-theme="light"] .chroma .mf { color:#0550ae}
+:root[data-theme="light"] .chroma .mh { color:#0550ae}
+:root[data-theme="light"] .chroma .mi { color:#0550ae}
+:root[data-theme="light"] .chroma .il { color:#0550ae}
+:root[data-theme="light"] .chroma .mo { color:#0550ae}
+:root[data-theme="light"] .chroma .o { color:#0550ae}
+:root[data-theme="light"] .chroma .ow { color:#0550ae}
+:root[data-theme="light"] .chroma .p { color:#1f2328}
+:root[data-theme="light"] .chroma .c { color:#57606a}
+:root[data-theme="light"] .chroma .ch { color:#57606a}
+:root[data-theme="light"] .chroma .cm { color:#57606a}
+:root[data-theme="light"] .chroma .c1 { color:#57606a}
+:root[data-theme="light"] .chroma .cs { color:#57606a}
+:root[data-theme="light"] .chroma .cp { color:#57606a}
+:root[data-theme="light"] .chroma .cpf { color:#57606a}
+:root[data-theme="light"] .chroma .gd { color:#82071e;background-color:#ffebe9}
+:root[data-theme="light"] .chroma .ge { color:#1f2328}
+:root[data-theme="light"] .chroma .gi { color:#116329;background-color:#dafbe1}
+:root[data-theme="light"] .chroma .go { color:#1f2328}
+:root[data-theme="light"] .chroma .gl { text-decoration:underline}
+:root[data-theme="light"] .chroma .w { color:#fff}
+/* hugo gen chromastyles --style=github-dark */
+:root[data-theme="dark"] .chroma .err { color:#f85149}
+:root[data-theme="dark"] .chroma .line { display:flex;}
+:root[data-theme="dark"] .chroma .k { color:#ff7b72}
+:root[data-theme="dark"] .chroma .kc { color:#79c0ff}
+:root[data-theme="dark"] .chroma .kd { color:#ff7b72}
+:root[data-theme="dark"] .chroma .kn { color:#ff7b72}
+:root[data-theme="dark"] .chroma .kp { color:#79c0ff}
+:root[data-theme="dark"] .chroma .kr { color:#ff7b72}
+:root[data-theme="dark"] .chroma .kt { color:#ff7b72}
+:root[data-theme="dark"] .chroma .nc { color:#f0883e}
+:root[data-theme="dark"] .chroma .no { color:#79c0ff}
+:root[data-theme="dark"] .chroma .nd { color:#d2a8ff}
+:root[data-theme="dark"] .chroma .ni { color:#ffa657}
+:root[data-theme="dark"] .chroma .ne { color:#f0883e}
+:root[data-theme="dark"] .chroma .nf { color:#d2a8ff}
+:root[data-theme="dark"] .chroma .nl { color:#79c0ff}
+:root[data-theme="dark"] .chroma .nn { color:#ff7b72}
+:root[data-theme="dark"] .chroma .py { color:#79c0ff}
+:root[data-theme="dark"] .chroma .nt { color:#7ee787}
+:root[data-theme="dark"] .chroma .nv { color:#79c0ff}
+:root[data-theme="dark"] .chroma .l { color:#a5d6ff}
+:root[data-theme="dark"] .chroma .ld { color:#79c0ff}
+:root[data-theme="dark"] .chroma .s { color:#a5d6ff}
+:root[data-theme="dark"] .chroma .sa { color:#79c0ff}
+:root[data-theme="dark"] .chroma .sb { color:#a5d6ff}
+:root[data-theme="dark"] .chroma .sc { color:#a5d6ff}
+:root[data-theme="dark"] .chroma .dl { color:#79c0ff}
+:root[data-theme="dark"] .chroma .sd { color:#a5d6ff}
+:root[data-theme="dark"] .chroma .s2 { color:#a5d6ff}
+:root[data-theme="dark"] .chroma .se { color:#79c0ff}
+:root[data-theme="dark"] .chroma .sh { color:#79c0ff}
+:root[data-theme="dark"] .chroma .si { color:#a5d6ff}
+:root[data-theme="dark"] .chroma .sx { color:#a5d6ff}
+:root[data-theme="dark"] .chroma .sr { color:#79c0ff}
+:root[data-theme="dark"] .chroma .s1 { color:#a5d6ff}
+:root[data-theme="dark"] .chroma .ss { color:#a5d6ff}
+:root[data-theme="dark"] .chroma .m { color:#a5d6ff}
+:root[data-theme="dark"] .chroma .mb { color:#a5d6ff}
+:root[data-theme="dark"] .chroma .mf { color:#a5d6ff}
+:root[data-theme="dark"] .chroma .mh { color:#a5d6ff}
+:root[data-theme="dark"] .chroma .mi { color:#a5d6ff}
+:root[data-theme="dark"] .chroma .il { color:#a5d6ff}
+:root[data-theme="dark"] .chroma .mo { color:#a5d6ff}
+:root[data-theme="dark"] .chroma .o { color:#ff7b72}
+:root[data-theme="dark"] .chroma .ow { color:#ff7b72}
+:root[data-theme="dark"] .chroma .c { color:#8b949e;font-style:italic}
+:root[data-theme="dark"] .chroma .ch { color:#8b949e;font-style:italic}
+:root[data-theme="dark"] .chroma .cm { color:#8b949e;font-style:italic}
+:root[data-theme="dark"] .chroma .c1 { color:#8b949e;font-style:italic}
+:root[data-theme="dark"] .chroma .cs { color:#8b949e;font-style:italic}
+:root[data-theme="dark"] .chroma .cp { color:#8b949e;font-style:italic}
+:root[data-theme="dark"] .chroma .cpf { color:#8b949e;font-style:italic}
+:root[data-theme="dark"] .chroma .gd { color:#ffa198;background-color:#490202}
+:root[data-theme="dark"] .chroma .ge { font-style:italic}
+:root[data-theme="dark"] .chroma .gr { color:#ffa198}
+:root[data-theme="dark"] .chroma .gh { color:#79c0ff}
+:root[data-theme="dark"] .chroma .gi { color:#56d364;background-color:#0f5323}
+:root[data-theme="dark"] .chroma .go { color:#8b949e}
+:root[data-theme="dark"] .chroma .gp { color:#8b949e}
+:root[data-theme="dark"] .chroma .gs { }
+:root[data-theme="dark"] .chroma .gu { color:#79c0ff}
+:root[data-theme="dark"] .chroma .gt { color:#ff7b72}
+:root[data-theme="dark"] .chroma .gl { text-decoration:underline}
+:root[data-theme="dark"] .chroma .w { color:#6e7681}

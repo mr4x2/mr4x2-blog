@@ -1,12 +1,6 @@
 {{ $title := .Title | default site.Title }}
 {{ $description := .Summary | default .Content }}
-{{ $defaultImage := printf "%s%s" .Site.BaseURL "images/og-image.png" }}
-{{ $image := $defaultImage }}
-
-{{ if .Params.image }}
-  {{ $image = absURL (index .Params.image 0) }}
-{{ end }}
-
+{{ $image := partial "preview-image.html" . }}
 
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />

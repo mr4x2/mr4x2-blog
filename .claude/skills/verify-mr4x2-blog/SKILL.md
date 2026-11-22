@@ -56,10 +56,11 @@ node $V/drive.mjs --run RUN_ID --name JOURNEY [--no-js] [--dark] [--width 390] s
 | `{"shot": "label"}` / `{"shot": "label", "viewport": true}` / `{"dom": "label"}` | Save a full-page PNG (capped at 4000 px, with `truncatedAt` recorded in `results.json`), a PNG of the viewport only, or the current DOM as HTML. |
 | `{"media": {"prefers-color-scheme": "dark"}}` | Emulate CSS media features for the rest of the journey (`prefers-color-scheme`, `prefers-reduced-motion`). |
 | `{"block": ["*main.*.js"]}` | Block requests whose URL matches a pattern, for the rest of the journey. Use it to see the page when a script never arrives. |
+| `{"inject": "<js source>"}` | Run a script in the page's own world at the start of every later navigation, for example to spy on a call the page makes. It does not touch the current page. |
 | `{"early": "<js expr>"}` | Arm a probe for the next navigation. In its first frame the page stores the JSON of the expression in `data-first-frame` on `<html>`, so an `expect` can prove what the first paint looked like. |
 | `{"text": "label"}` | Save the theme's visible text as `NN-label.rendered.txt` and fail the step on any slop pattern in it. See Slop check. |
 
-- Expressions run in an isolated world, so they also work with `--no-js`. They can use `$(target)` and `$$(target)`, where a target is a selector string or `{role, name}`, plus `visible(el)` and `nameOf(el)`. The roles are `button`, `link`, `searchbox`, `heading`, `status`, `group` and `listitem`.
+- Expressions run in an isolated world, so they also work with `--no-js`. They can use `$(target)` and `$$(target)`, where a target is a selector string or `{role, name}`, plus `visible(el)`, `nameOf(el)` and `VW`, the viewport width the driver emulates. The roles are `button`, `link`, `searchbox`, `heading`, `status`, `group` and `listitem`.
 - Prefer `{role, name}` and ARIA labels over classes. The Tailwind classes change with the theme (#16).
 - Any uncaught page exception fails the journey and goes to `console.log`.
 - A click that navigates is fine: the next step re-attaches to the new page. Follow it with a `wait` on `location.pathname`.

@@ -1,0 +1,5 @@
+{{- $image := printf "%s%s" site.BaseURL "images/og-image.png" -}}
+{{- with .Params.image -}}
+  {{- $image = absURL (index . 0) -}}
+{{- end -}}
+{{- return $image -}}

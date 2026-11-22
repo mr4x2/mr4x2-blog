@@ -93,6 +93,7 @@ const { executionContextId: ctx } = await (async () => {
   return send("Page.createIsolatedWorld", { frameId: tree.frameTree.frame.id, worldName: "drive" });
 })();
 const HELPERS = `
+  const VW = ${width};
   const ROLES = { button: 'button,[role=button]', link: 'a[href],[role=link]', searchbox: 'input[type=search],[role=searchbox]',
     heading: 'h1,h2,h3,h4,h5,h6,[role=heading]', status: '[role=status],output', group: '[role=group],fieldset', listitem: 'li,[role=listitem]' };
   const visible = (el) => !!el && !el.closest('[hidden]') && el.getClientRects().length > 0;
@@ -197,6 +198,9 @@ for (const s of steps) {
       await send("Network.enable");
       await send("Network.setBlockedURLs", { urls: s.block });
       rec.result = s.block;
+    } else if (s.inject !== undefined) {
+      await send("Page.addScriptToEvaluateOnNewDocument", { source: s.inject });
+      rec.result = "injected";
     } else if (s.early !== undefined) {
       const source = `(function probe() { requestAnimationFrame(() => { const r = document.documentElement; try { r.setAttribute("data-first-frame", JSON.stringify(${s.early})); } catch { probe(); } }); })();`;
       if (earlyId) await send("Page.removeScriptToEvaluateOnNewDocument", { identifier: earlyId });

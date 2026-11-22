@@ -1,0 +1,12 @@
+[
+  {"goto": "/"},
+  {"wait": "!document.documentElement.className.includes('intro')"},
+  {"click": {"role": "link", "name": "about/"}, "label": "menu: about"},
+  {"wait": "location.pathname === '/about/'"},
+  {"expect": "$('h1').textContent.trim()", "equals": "About Me", "label": "title"},
+  {"expect": "[!!$('.article-meta'), !!$('details.toc'), !!$('article .post-tags'), !!$('.article-nav'), !!$('time')]", "equals": [false, false, false, false, false], "label": "a plain page: no date, reading time, tags, table of contents or older and newer links"},
+  {"expect": "$('.prose').textContent.includes('Welcome to my profile')", "label": "text renders"},
+  {"expect": "(g => [g.dataset.mapping, g.dataset.theme === document.documentElement.dataset.theme])($('script[src=\"https://giscus.app/client.js\"]'))", "equals": ["pathname", true], "label": "giscus keeps the pathname mapping"},
+  {"shot": "about"},
+  {"text": "about"}
+]

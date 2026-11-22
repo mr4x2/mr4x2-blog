@@ -27,6 +27,12 @@ function apply(theme, toggle) {
   root.dataset.theme = theme;
   toggle.setAttribute("aria-pressed", String(theme === "dark"));
   syncMeta();
+  document
+    .querySelector("iframe.giscus-frame")
+    ?.contentWindow.postMessage(
+      { giscus: { setConfig: { theme } } },
+      "https://giscus.app",
+    );
   requestAnimationFrame(() =>
     requestAnimationFrame(() => root.classList.remove("theme-swapping")),
   );

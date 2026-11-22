@@ -1,0 +1,12 @@
+[
+  {"inject": "(() => { const get = Object.getOwnPropertyDescriptor(HTMLIFrameElement.prototype, 'contentWindow').get; Object.defineProperty(HTMLIFrameElement.prototype, 'contentWindow', { get() { const w = get.call(this); if (!w || !this.classList.contains('giscus-frame')) return w; return new Proxy(w, { get(t, k) { if (k === 'postMessage') return (m, o) => { document.documentElement.setAttribute('data-giscus-msg', JSON.stringify([m, o])); t.postMessage(m, o); }; const v = t[k]; return typeof v === 'function' ? v.bind(t) : v; } }); } }); })()"},
+  {"goto": "/a-great-trip-in-thailand/"},
+  {"wait": "!!$('iframe.giscus-frame')", "timeout": 30000, "label": "giscus iframe appears"},
+  {"expect": "new URL($('iframe.giscus-frame').src).searchParams.get('theme') === document.documentElement.dataset.theme", "label": "the iframe starts in the site theme"},
+  {"scroll": "iframe.giscus-frame"},
+  {"shot": "giscus-before", "viewport": true},
+  {"click": {"role": "button", "name": "Toggle dark mode"}, "label": "toggle the theme"},
+  {"expect": "(m => [m[1], m[0].giscus.setConfig.theme === document.documentElement.dataset.theme])(JSON.parse(document.documentElement.getAttribute('data-giscus-msg')))", "equals": ["https://giscus.app", true], "label": "giscus is told the new theme"},
+  {"expect": "new Promise(r => setTimeout(r, 1500, 'waited'))", "equals": "waited"},
+  {"shot": "giscus-after", "viewport": true}
+]
