@@ -1,7 +1,5 @@
 #!/usr/bin/env node
-// Drive one page of a running verify instance in headless Chromium over CDP, with no npm dependencies.
 // usage: drive.mjs --run RUN_ID --name JOURNEY [--no-js] [--width 1280] [--height 900] STEPS.json|-
-// Writes .verify/runs/RUN_ID/JOURNEY/{NN-label.png, NN-label.html, results.json, console.log}.
 import { spawn } from "node:child_process";
 import { readFileSync, writeFileSync, mkdirSync, existsSync, readdirSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
@@ -31,7 +29,6 @@ function findChrome() {
   throw new Error("no Chromium found; set CHROME=/path/to/chrome");
 }
 
-// The real window must match the emulated viewport, or captures tile the smaller default surface.
 const chrome = spawn(findChrome(), ["--headless", "--no-sandbox", "--disable-gpu", "--hide-scrollbars", `--window-size=${width},${height}`, "--remote-debugging-port=0",
   `--user-data-dir=${join(runDir, "chrome-profile")}`, "about:blank"], { stdio: ["ignore", "ignore", "pipe"] });
 const wsUrl = await new Promise((ok, fail) => {
@@ -67,7 +64,7 @@ listeners.push((m) => {
 const { targetId } = await send("Target.createTarget", { url: "about:blank" });
 ({ sessionId: session } = await send("Target.attachToTarget", { targetId, flatten: true }));
 await send("Page.enable"); await send("Runtime.enable");
-// Size the real window so its inner area equals the emulated viewport; a smaller real surface makes captures tile.
+// A real window smaller than the emulated viewport makes captures tile.
 let windowId, frameH = 0;
 {
   const probe = async () => (await send("Runtime.evaluate", { expression: "[innerWidth, innerHeight]", returnByValue: true })).result.value;
@@ -147,8 +144,7 @@ for (const s of steps) {
     } else if (s.eval !== undefined) {
       rec.result = await evaluate(s.eval);
     } else if (s.shot !== undefined) {
-      // Full page: grow the real window and the viewport to the content height (capped), capture, restore.
-      // Capturing beyond a smaller real window tiles it; past ~4000 px a long post renders every lazy photo at once and stalls Chromium.
+      // Past FULL_MAX a long post loads every lazy photo at once and stalls Chromium.
       let h = height;
       if (s.viewport !== true) {
         const contentH = Math.ceil((await send("Page.getLayoutMetrics")).cssContentSize.height);

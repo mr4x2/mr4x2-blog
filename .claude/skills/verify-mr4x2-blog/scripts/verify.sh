@@ -1,6 +1,4 @@
 #!/usr/bin/env bash
-# Launch, check and stop disposable preview instances of the mr4x2 blog.
-# Every instance belongs to one run under .verify/runs/<RUN_ID>/, which also holds its evidence.
 set -euo pipefail
 
 REPO="$(cd "$(dirname "${BASH_SOURCE[0]}")/../../../.." && pwd)"
@@ -61,8 +59,7 @@ cmd_launch() {
       ;;
     *) usage ;;
   esac
-  # shellcheck disable=SC1091
-  . "$RUN_DIR/instance.env"
+  load "$run"
   for _ in $(seq 1 60); do
     if [ "$MODE" = prod ]; then docker logs "$CONTAINER" >"$RUN_DIR/server.log" 2>&1 || true; fi
     if grep -q "Web Server is available at" "$RUN_DIR/server.log" 2>/dev/null &&
