@@ -14,3 +14,6 @@ Thumbs.db
 
 # Verification runs (evidence, logs)
 .verify/
+
+# Python
+__pycache__/
