@@ -46,3 +46,38 @@ The first rollout of the nginx image needs one extra step. Run `docker compose s
 - `layouts/_default/reading.html` renders it with `site.Data.reading` (`hugo.Data` doesn't exist in Hugo 0.145). The page builds and shows `Nothing here yet.` when the file is missing or `[]`.
 - Run the sync locally with `set -a; . ./.env; set +a; python3 scripts/sync_raindrop.py`. It needs `RAINDROP_TOKEN` (a Raindrop test token) and `RAINDROP_COLLECTION_ID`. Add `--output <file>` to write somewhere else.
 - Run the sync tests with `python3 -m unittest discover -s scripts -v`.
+
+## Visual rules you can spot in a diff
+
+The look is style B, a clean blog with a terminal flavor. Full spec: `docs/superpowers/specs/2026-11-22-new-theme-design.md`. Each rule is one a reviewer can catch in a diff.
+
+1. **Tokens only.** Colors, font sizes, durations and easing curves are tokens in `assets/css/input.css`. Templates and scripts never declare a hex color, a `px` font size, an `ms` duration or a `cubic-bezier`. The one exception is the typing speed, a named constant at the top of the intro script.
+2. **No gradients, no `backdrop-filter`, no glass.** The sticky header is a flat `--bg` fill. The search popup's backdrop is a flat `--backdrop` color.
+3. **No emoji as icons.** Icons are inline SVG with Lucide paths, `stroke-width` 1.5, at 14px, 16px or 20px, one size per context. Emoji may appear only in post content the author wrote.
+4. **Two weights.** Inter uses 400 for text and 600 for titles. JetBrains Mono uses 400, and 700 only for the logo. Never 500.
+5. **One accent color.** Green marks a terminal element or a link, and nothing else. No second accent, no decorative color.
+6. **No left-border accent blocks.** The `whoami` line sits under its prompt with no border.
+7. **No cards around static text.** Post rows are separated by dashed dividers. The search popup is the only raised surface.
+8. **The type scale is closed** (`--fs-*`). A new size is a new token.
+9. **Motion changes only `transform`, `opacity` and color.** Never animate `height`, `margin` or position, and never use `blur` to bridge two states.
+10. **One focus ring**, declared once in `assets/css/input.css`: `:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }`.
+
+Dark mode is on purpose. Under `prefers-reduced-motion: reduce`, movement stops but opacity fades of 200ms stay.
+
+## Avoid slop
+
+These cover what you write: UI text, comments, commits and the shape of the code.
+
+1. **No filler, no hedging.** Open with the fact. Say what you ran and what it showed.
+2. **Comments say why, never what.** Delete a comment that restates the next line or a name.
+3. **No generic UI copy.** A message says what happened and what to do next. No lorem ipsum, "Coming soon" or "Something went wrong".
+4. **No emoji in UI strings, comments or commit messages.** Only post content the author wrote may hold one.
+5. **No abstraction with one caller.** Write it inline, and extract it when a second real use lands.
+
+Before you finish, run this from the repo root. It must print nothing:
+
+```sh
+grep -rnP '[\x{1F300}-\x{1FAFF}\x{2600}-\x{27BF}]|[Ll]orem|Coming soon|Something went wrong|backdrop-filter|-gradient\(|font-medium|font-weight: ?500' layouts assets/js assets/css/input.css hugo.toml
+```
+
+`.claude/skills/verify-mr4x2-blog/scripts/slop-check.sh` runs the line above, read from this file. The grep skips `content/`, because posts may hold the author's own emoji. Then reread your `git diff` and delete every added comment or string whose removal loses nothing.

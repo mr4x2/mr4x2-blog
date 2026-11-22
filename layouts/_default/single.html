@@ -20,7 +20,7 @@
             <dl class="space-y-10">
               <div>
                 <dt class="sr-only">Published on</dt>
-                <dd class="text-base font-medium leading-6 text-gray-500">
+                <dd class="text-base font-normal leading-6 text-gray-500">
                   {{ $dateMachine := .Date | time.Format "2006-01-02T15:04:05-07:00" }}
                   {{ $dateHuman := .Date | time.Format ":date_full" }}
                   <time datetime="{{ $dateMachine }}">{{ $dateHuman }}</time>
@@ -55,7 +55,7 @@
                     alt="Profile Image"
                     loading="lazy"
                   />
-                  <dl class="whitespace-nowrap text-sm font-medium leading-5">
+                  <dl class="whitespace-nowrap text-sm font-normal leading-5">
                     <dt class="sr-only">Name</dt>
                     <dd class="text-gray-900">{{ .Site.Params.username }}</dd>
                   </dl>
@@ -120,7 +120,7 @@
 
           <footer>
             <div
-              class="divide-gray-200 text-sm font-medium leading-5 xl:col-start-1 xl:row-start-2 xl:divide-y"
+              class="divide-gray-200 text-sm font-normal leading-5 xl:col-start-1 xl:row-start-2 xl:divide-y"
             >
               <div class="py-4 xl:py-8">
                 <h2 class="text-xs uppercase tracking-wide text-gray-500">
@@ -130,7 +130,7 @@
                   {{ range .Params.tags }}
                     <a
                       href="/tags/{{ . | urlize }}"
-                      class="mr-3 text-sm font-medium uppercase text-indigo-500 hover:text-indigo-600"
+                      class="mr-3 text-sm font-normal uppercase text-indigo-500 hover:text-indigo-600"
                       >{{ . }}</a
                     >
                   {{ end }}

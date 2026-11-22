@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 // usage: drive.mjs --run RUN_ID --name JOURNEY [--no-js] [--width 1280] [--height 900] STEPS.json|-
 import { spawn } from "node:child_process";
-import { readFileSync, writeFileSync, mkdirSync, existsSync, readdirSync } from "node:fs";
+import { readFileSync, writeFileSync, appendFileSync, mkdirSync, existsSync, readdirSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
 import { homedir } from "node:os";
 import { fileURLToPath } from "node:url";
@@ -17,7 +17,8 @@ if (!run || !name || !stepsArg) { console.error("usage: drive.mjs --run RUN_ID -
 const repo = resolve(dirname(fileURLToPath(import.meta.url)), "../../../..");
 const runDir = join(repo, ".verify/runs", run);
 const env = Object.fromEntries(readFileSync(join(runDir, "instance.env"), "utf8").trim().split("\n").map((l) => l.split(/=(.*)/s).slice(0, 2)));
-const out = join(runDir, name);
+const plant = !!process.env.VERIFY_PLANT_SLOP;
+const out = join(runDir, plant ? `${name}-planted-slop` : name);
 mkdirSync(out, { recursive: true });
 const steps = JSON.parse(stepsArg === "-" ? readFileSync(0, "utf8") : readFileSync(stepsArg, "utf8"));
 
@@ -115,6 +116,29 @@ async function evaluate(expr, tries = 20) {
 }
 const T = (t) => JSON.stringify(t);
 const FULL_MAX = 4000;
+
+// The same patterns as CLAUDE.md "Avoid slop", applied to what the theme rendered. Post bodies, post rows,
+// Reading bookmarks and search results hold the author's and other people's text, so they are skipped.
+const SKIP_TEXT = ".prose, .post, li[data-tags], [role=option]";
+const TEXT_RULES = [
+  ["emoji", /[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}]|\p{Emoji_Presentation}|\u{FE0F}/gu],
+  ["lorem-ipsum", /lorem/giu],
+  ["coming-soon", /coming soon/giu],
+  ["something-went-wrong", /something went wrong/giu],
+];
+const READ_THEME_TEXT = `(() => {
+  const shown = (el) => visible(el) && getComputedStyle(el).visibility !== 'hidden' && !el.closest(${T(SKIP_TEXT)});
+  const lines = [];
+  const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT);
+  for (let n; (n = walker.nextNode());) {
+    const p = n.parentElement;
+    if (p && !/^(SCRIPT|STYLE|NOSCRIPT)$/.test(p.tagName) && n.nodeValue.trim() && shown(p)) lines.push(n.nodeValue.trim());
+  }
+  const attrs = [...document.body.querySelectorAll('[aria-label],[placeholder],[title],img[alt]')].filter(shown)
+    .flatMap((el) => ['aria-label', 'placeholder', 'title', 'alt'].filter((a) => el.getAttribute(a)).map((a) => a + '=' + el.getAttribute(a)));
+  return { visibleText: lines.join('\\n'), attributeText: attrs.join('\\n') };
+})()`;
+const PLANT_SLOP = `(() => { const s = document.createElement('span'); s.textContent = 'Coming soon \\u{1F389}'; document.querySelector('header').append(s); })()`;
 const results = []; let n = 0; let failed = false;
 const label = (s, d) => String(s.label || d).replace(/[^a-z0-9-]+/gi, "-").slice(0, 40);
 
@@ -159,6 +183,21 @@ for (const s of steps) {
       const shot = await send("Page.captureScreenshot", { format: "png" });
       if (h !== height) await resize(height);
       const f = join(out, `${String(n).padStart(2, "0")}-${label(s, s.shot)}.png`); writeFileSync(f, Buffer.from(shot.data, "base64")); rec.result = f;
+    } else if (s.text !== undefined) {
+      if (plant) await evaluate(PLANT_SLOP);
+      const { visibleText, attributeText } = await evaluate(READ_THEME_TEXT);
+      const findings = [];
+      for (const [id, re] of TEXT_RULES) {
+        for (const [source, text] of [["visible-text", visibleText], ["attributes", attributeText]]) {
+          for (const m of text.normalize("NFC").matchAll(re)) findings.push({ rule: id, source, match: m[0] });
+        }
+      }
+      const base = `${String(n).padStart(2, "0")}-${label(s, s.text)}`;
+      writeFileSync(join(out, `${base}.rendered.txt`), `# visible text\n${visibleText}\n# attributes\n${attributeText}\n`);
+      appendFileSync(join(out, "rendered-text.jsonl"), JSON.stringify({ label: s.text, findings }) + "\n");
+      rec.result = findings;
+      rec.pass = findings.length === 0;
+      if (!rec.pass) failed = true;
     } else if (s.dom !== undefined) {
       const f = join(out, `${String(n).padStart(2, "0")}-${label(s, s.dom)}.html`); writeFileSync(f, await evaluate("document.documentElement.outerHTML")); rec.result = f;
     } else throw new Error("unknown step");

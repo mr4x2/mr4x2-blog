@@ -1,0 +1,6 @@
+[
+  {"goto": "/"},
+  {"expect": "$$('main a').map(a => a.textContent.trim()).includes('A great trip in Thailand')", "label": "posts are listed"},
+  {"shot": "home"},
+  {"text": "home"}
+]

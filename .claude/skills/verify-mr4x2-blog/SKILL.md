@@ -54,6 +54,7 @@ node $V/drive.mjs --run RUN_ID --name JOURNEY [--no-js] [--width 390] steps.json
 | `{"eval": "<js expr>"}` | Record a value. |
 | `{"scroll": {"role": "heading", "name": "…"}}` | Scroll the target into the middle of the viewport, which also triggers lazy images there. |
 | `{"shot": "label"}` / `{"shot": "label", "viewport": true}` / `{"dom": "label"}` | Save a full-page PNG (capped at 4000 px, with `truncatedAt` recorded in `results.json`), a PNG of the viewport only, or the current DOM as HTML. |
+| `{"text": "label"}` | Save the theme's visible text as `NN-label.rendered.txt` and fail the step on any slop pattern in it. See Slop check. |
 
 - Expressions run in an isolated world, so they also work with `--no-js`. They can use `$(target)` and `$$(target)`, where a target is a selector string or `{role, name}`, plus `visible(el)` and `nameOf(el)`. The roles are `button`, `link`, `searchbox`, `heading`, `status`, `group` and `listitem`.
 - Prefer `{role, name}` and ARIA labels over classes. The Tailwind classes change with the theme (#16).
@@ -73,6 +74,20 @@ node $V/drive.mjs --run RUN_ID --name JOURNEY [--no-js] [--width 390] steps.json
 - Mocks are only acceptable at the Raindrop API boundary, through the unit tests. Journeys use the real API, or skip and say so.
 - Report a skipped or unreachable entry point as **skipped, with the reason**. Never report it as verified through some other path.
 
+## Slop check
+
+CLAUDE.md has a "Visual rules" section and an "Avoid slop" section. The second ends in a `grep` that must print nothing before any work is finished. This skill never keeps its own copy of it.
+
+```bash
+$V/slop-check.sh                      # scan this tree
+SLOP_ROOT=/path/to/copy $V/slop-check.sh   # scan a copy, for example one with a planted violation
+```
+
+- The script reads the `grep` line under `## Avoid slop` in `CLAUDE.md` at run time and runs it from the repo root. It prints matches as `file:line:text` and exits 1 on a match, 0 on none, and 2 when it cannot find or run the rule.
+- The grep reads source only. Its rendered half is the `text` step: after each page state a journey cares about, `{"text": "label"}` reads the visible text and the `aria-label`, `placeholder`, `title` and `alt` values of the theme (header, footer, home intro, search popup, tag lists, 404 page) and fails the step on an emoji, "lorem", "Coming soon" or "Something went wrong". It skips `.prose` (post and About bodies), `.post` rows, Reading bookmarks (`li[data-tags]`) and search results (`[role=option]`), which hold the author's and other people's text.
+- Prove the check still bites: run any journey with `VERIFY_PLANT_SLOP=1`. The run injects "Coming soon" and an emoji into the header before each `text` step, writes its evidence to `<journey>-planted-slop/`, and must exit non-zero. If it passes, the check is broken.
+- Reread your `git diff` as well. The grep cannot see a comment that restates its code.
+
 ## Cleanup
 
 ```bash
@@ -88,5 +103,6 @@ $V/verify.sh list           # shows any runs still up
 
 - `scripts/verify.sh launch [local|prod] | doctor RUN_ID | stop RUN_ID | list`
 - `scripts/drive.mjs --run RUN_ID --name JOURNEY [--no-js] [--width N] [--height N] STEPS.json|-`
+- `scripts/slop-check.sh` runs the CLAUDE.md "Avoid slop" grep.
 
 Both are executable and dependency-free: bash, curl, python3, Node ≥ 22 for the built-in WebSocket, Docker for `prod` mode, and a cached Playwright Chromium.
