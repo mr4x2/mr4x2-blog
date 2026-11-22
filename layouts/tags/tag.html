@@ -7,19 +7,11 @@
         </h1>
       </div>
 
-      <div class="flex flex-col gap-8 md:flex-row">
-        <aside class="hidden md:block md:w-64">
-          {{ partial "sidebar.html" . }}
-        </aside>
-
-        <div class="min-w-0 flex-1">
-          <ul class="divide-y divide-gray-200">
-            {{ range .Pages }}
-              {{ partial "post-summary.html" . }}
-            {{ end }}
-          </ul>
-        </div>
-      </div>
+      <ul class="divide-y divide-gray-200">
+        {{ range .Pages }}
+          {{ partial "post-summary.html" . }}
+        {{ end }}
+      </ul>
     </div>
   </div>
 {{ end }}

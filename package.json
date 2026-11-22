@@ -1,12 +1,12 @@
 {
-  "name": "hugo-discaptive",
+  "name": "mr4x2-blog",
   "version": "1.0.0",
-  "description": "Hugo Discaptive Theme",
+  "description": "mr4x2.com Hugo blog",
+  "private": true,
   "scripts": {
     "build": "npx @tailwindcss/cli -i ./assets/css/input.css -o ./assets/css/output.css --minify",
     "watch": "npx @tailwindcss/cli -i ./assets/css/input.css -o ./assets/css/output.css --watch"
   },
-  "author": "Discaptive",
   "license": "ISC",
   "devDependencies": {
     "@tailwindcss/cli": "^4.0.8",

@@ -14,7 +14,7 @@ Personal Hugo blog (mr4x2.com): travel and tech posts in English.
 
 ## Layout and theme
 
-- The theme is vendored. `layouts/` holds the hugo-discaptive templates, edited in place, and `theme.toml` is that theme's metadata. There is no theme directory or submodule.
+- The theme lives in this repo. `layouts/` holds the templates, edited in place. There is no theme directory or submodule.
 - `assets/css/output.css` is the compiled Tailwind file, committed to the repo. It is what `layouts/partials/head/css.html` loads, and both `npm run build` and `npm run watch` write to it.
 - `public/` and `resources/` are generated build output.
 
