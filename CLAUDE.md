@@ -36,3 +36,13 @@ The site is static, so drafts never go live. The Hugo `baseURL` comes from `hugo
 On the server, `docker-compose.yaml` runs the image behind Traefik on port 80. Watchtower, in the same compose file, checks for a new `:latest` every 5 minutes and recreates the blog container with the old container's command and labels. It swaps only the image. A change to `docker-compose.yaml` applies only after `git pull && docker compose up -d` in the server's checkout.
 
 The first rollout of the nginx image needs one extra step. Run `docker compose stop watchtower` before you merge, so Watchtower cannot start nginx with the old `server -D` command and the old port 1313 label. After CI pushes the new `:latest`, run `git pull && docker compose pull && docker compose up -d`, check the site, then confirm that Watchtower runs again.
+
+## Reading page
+
+`/reading` lists the Bookmarks in the author's Raindrop Reading collection. Terms (Bookmark, Note, Excerpt, Read date) are defined in `CONTEXT.md`.
+
+- Data flow: Raindrop → `.github/workflows/sync-reading.yml` (hourly) runs `scripts/sync_raindrop.py` → commits `data/reading.json` to `main` → dispatches `hugo.yml` → Docker Hub → Watchtower.
+- `data/reading.json` is generated. Don't edit it by hand: the next sync overwrites it, and a Bookmark deleted in Raindrop disappears from the page.
+- `layouts/_default/reading.html` renders it with `site.Data.reading` (`hugo.Data` doesn't exist in Hugo 0.145). The page builds and shows `Nothing here yet.` when the file is missing or `[]`.
+- Run the sync locally with `set -a; . ./.env; set +a; python3 scripts/sync_raindrop.py`. It needs `RAINDROP_TOKEN` (a Raindrop test token) and `RAINDROP_COLLECTION_ID`. Add `--output <file>` to write somewhere else.
+- Run the sync tests with `python3 -m unittest discover -s scripts -v`.

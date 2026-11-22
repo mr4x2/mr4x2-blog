@@ -1,0 +1,6 @@
+[
+  {"goto": "/reading/"},
+  {"expect": "$$('li[data-tags]').filter(visible).length", "equals": 5, "label": "all rows without JS"},
+  {"expect": "!visible($({role:'searchbox', hidden:true})) && !visible($('[role=group]'))", "label": "controls hidden"},
+  {"shot": "nojs"}
+]

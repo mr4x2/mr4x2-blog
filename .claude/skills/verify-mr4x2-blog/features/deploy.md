@@ -1,0 +1,38 @@
+# Deploy chain
+
+A merge to `main`, or a sync commit, reaches https://mr4x2.com with no manual step. `hugo.yml` builds and pushes `mr4x2/hugo-blog:latest` and `:<sha>` from `main` only. Watchtower on this server checks every 5 minutes and recreates `mr4x2-blog-hugo-blog-1`. The hourly `sync-reading.yml` (#15) commits `data/reading.json` and dispatches `hugo.yml`.
+
+## Sub-features
+
+- `deploy-pr-no-push`: a PR run skips "Docker Login" and builds with `push: false`.
+- `deploy-main-push`: a `main` run pushes `:latest` and `:<sha>`.
+- `deploy-watchtower`: Watchtower logs `Found new image` and `updated=1`, and the blog container runs the new image ID.
+- `deploy-live`: https://mr4x2.com returns 200 and serves the change.
+- `deploy-sync-dispatch`: a sync run that changed the data commits as `github-actions[bot]` and starts a `hugo.yml` run (after #15).
+
+## How to get to it (user POV)
+
+- Merge a PR on GitHub, or wait for the hourly sync.
+- Actions → "Deploy Hugo site to Pages" or "Sync reading" → Run workflow. That's a production action, so only do it when the author asked for it in this conversation.
+
+## Driving it with read-only commands
+
+Preconditions:
+
+- `gh auth status` is logged in as `mr4x2`. This machine is the production server.
+- `E=.verify/runs/$RUN_ID/deploy`, created with `mkdir -p`.
+
+- **CI run.** `gh run list --repo mr4x2/mr4x2-blog --limit 5 --json databaseId,event,headBranch,headSha,status,conclusion`. Find the run for the merge commit or the dispatch. Then `gh run view <id> --repo mr4x2/mr4x2-blog --json jobs -q '.jobs[].steps[] | "\(.name)\t\(.conclusion)"' >$E/steps.txt`. On `main`, "Docker Login" shows `success`. On a PR it shows `skipped`, and `gh run view <id> --log | grep 'push:'` shows `push: false`.
+- **Registry.** `curl -s "https://hub.docker.com/v2/repositories/mr4x2/hugo-blog/tags?page_size=3&ordering=last_updated" | jq -r '.results[] | "\(.name) \(.last_updated)"' >$E/tags.txt`. `latest` and the full commit SHA are both newer than the run's start.
+- **Watchtower.** `docker inspect mr4x2-blog-hugo-blog-1 --format '{{.Image}}' >$E/image-before.txt` before the push. Then wait for the next 5-minute check. `docker logs --since <run start> mr4x2-blog-watchtower-1 2>&1 | grep -E 'Found new image|Update session|level=(warn|error)' >$E/watchtower.txt` shows `updated=1 failed=0`. Run `docker inspect … --format '{{.Image}}' >$E/image-after.txt` again: it differs from before.
+- **Live.** `curl -s -o /dev/null -w '%{http_code}' https://mr4x2.com/` prints `200`. `curl -s https://mr4x2.com/<changed path>` contains the change. For #15 that's `/reading/`, with a Bookmark title just saved in Raindrop.
+- **Sync dispatch (after #15).** `gh run list --workflow sync-reading.yml --limit 1` shows success. If the data changed, `git log origin/main -1 --format='%an %s'` shows `github-actions[bot] chore(reading): sync from Raindrop`, and a `workflow_dispatch` run of `hugo.yml` started after it.
+- **Proof.** Keep the files in `$E`.
+
+## Gotchas
+
+- Watchtower polls every 300 s, so a deploy lands up to 5 minutes after the push. Wait by polling its log, never by a fixed sleep.
+- An unchanged build can still produce a new image digest (build metadata), so `updated=1` alone doesn't prove new content. Check the live page for the change.
+- A commit pushed with `GITHUB_TOKEN` never triggers `hugo.yml` by itself. If the sync committed but no build followed, the dispatch step failed.
+- Never restart, stop or `docker compose up` the production stack as part of a verification. Ask the author first.
+- GitHub turns off scheduled workflows after 60 days with no repository activity. If the sync stops running, check the Actions tab for a "disabled" banner.

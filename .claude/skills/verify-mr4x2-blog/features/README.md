@@ -1,0 +1,40 @@
+# mr4x2 blog verification map
+
+This directory is the maintained source for verifying what readers and the author can do with the blog. Read this index before driving the site, then use the matching feature file as the recipe.
+
+## Baseline preconditions
+
+- Work from the repo root, with `V=.claude/skills/verify-mr4x2-blog/scripts`.
+- Launch a disposable instance with `$V/verify.sh launch local` or `$V/verify.sh launch prod`, and note its `RUN_ID` and `URL`.
+- `$V/verify.sh doctor RUN_ID` reports `doctor: healthy` before any journey.
+- The content is whatever is in the working tree. On `main` today that's two Posts (`A great trip in Thailand`, `Memorable days in France`) and the About page.
+- Never drive https://mr4x2.com or the `mr4x2-blog-hugo-blog-1` container, except for the read-only checks in `deploy.md`.
+
+## Driving conventions
+
+- Each journey is a JSON array of `drive.mjs` steps, run with `--name <feature-id>` so its evidence lands in its own folder.
+- Use roles and accessible names (`{"role": "link", "name": "Reading"}`) or ARIA labels, never Tailwind classes.
+- Start every journey with a `goto`. Don't rely on the state a previous journey left behind.
+- Run a phone-width pass (`--width 390`) for any layout change. The tag sidebar on the home page hides below 768 px by design.
+- Terms (Post, Bookmark, Note, Excerpt, Read date…) are defined in the repo's `CONTEXT.md`.
+
+## Proof and skip reporting
+
+- UI proof is a before-and-after screenshot pair, plus `expect` steps on the resulting DOM, all in `.verify/runs/RUN_ID/<feature-id>/`.
+- CLI proof is the command, stdout, stderr and exit code, plus the file it wrote or a check that it wrote nothing.
+- Deploy proof is the run or commit IDs, the image IDs before and after, and Watchtower's log lines.
+- Record the feature ID and the entry point you used with each artifact.
+- An entry point you couldn't reach is reported as skipped, with the command you tried and the precondition that wasn't met.
+
+## Feature entry contract
+
+Each feature file starts with an H1 title and a paragraph describing the behavior the user sees. Then come exactly four H2 sections, in this order: `Sub-features`, `How to get to it (user POV)`, `Driving it with drive.mjs` (or with the CLI or with read-only commands), and `Gotchas`.
+
+## Features
+
+- [Home post list](./home.md) covers "All Posts", the tag sidebar and the header menu.
+- [Post page](./post.md) covers the date, title, table of contents, centered photos with captions, tags, comments and the back link.
+- [Tags](./tags.md) covers the Tags index and each tag's post list.
+- [Reading page](./reading.md) covers the `/reading` Bookmark list, the tag filter, search, the no-JS fallback and the empty state. It's **new in #15**.
+- [Raindrop sync](./sync.md) covers the author's sync command: the happy path, a bad token, missing settings, and leaving the file alone when nothing changed.
+- [Deploy chain](./deploy.md) covers the read-only checks that a merge or sync reached the live site.
