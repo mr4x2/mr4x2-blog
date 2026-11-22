@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 // usage: drive.mjs --run RUN_ID --name JOURNEY [--no-js] [--width 1280] [--height 900] STEPS.json|-
 import { spawn } from "node:child_process";
-import { readFileSync, writeFileSync, appendFileSync, mkdirSync, existsSync, readdirSync } from "node:fs";
+import { readFileSync, writeFileSync, appendFileSync, mkdirSync, existsSync, readdirSync, rmSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
 import { homedir } from "node:os";
 import { fileURLToPath } from "node:url";
@@ -30,6 +30,8 @@ function findChrome() {
   throw new Error("no Chromium found; set CHROME=/path/to/chrome");
 }
 
+// A fresh profile per journey, so a saved theme or a played intro never leaks into the next one.
+rmSync(join(runDir, "chrome-profile"), { recursive: true, force: true });
 const chrome = spawn(findChrome(), ["--headless", "--no-sandbox", "--disable-gpu", "--hide-scrollbars", `--window-size=${width},${height}`, "--remote-debugging-port=0",
   `--user-data-dir=${join(runDir, "chrome-profile")}`, "about:blank"], { stdio: ["ignore", "ignore", "pipe"] });
 const wsUrl = await new Promise((ok, fail) => {
@@ -183,6 +185,14 @@ for (const s of steps) {
       const shot = await send("Page.captureScreenshot", { format: "png" });
       if (h !== height) await resize(height);
       const f = join(out, `${String(n).padStart(2, "0")}-${label(s, s.shot)}.png`); writeFileSync(f, Buffer.from(shot.data, "base64")); rec.result = f;
+    } else if (s.media !== undefined) {
+      const features = Object.entries(s.media).map(([name, value]) => ({ name, value }));
+      await send("Emulation.setEmulatedMedia", { features });
+      rec.result = features;
+    } else if (s.early !== undefined) {
+      const source = `requestAnimationFrame(() => { const r = document.documentElement; if (!r.hasAttribute("data-first-frame")) r.setAttribute("data-first-frame", JSON.stringify(${s.early})); });`;
+      await send("Page.addScriptToEvaluateOnNewDocument", { source });
+      rec.result = "armed";
     } else if (s.text !== undefined) {
       if (plant) await evaluate(PLANT_SLOP);
       const { visibleText, attributeText } = await evaluate(READ_THEME_TEXT);

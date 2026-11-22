@@ -17,6 +17,8 @@ Personal Hugo blog (mr4x2.com): travel and tech posts in English.
 - The theme lives in this repo. `layouts/` holds the templates, edited in place. There is no theme directory or submodule.
 - `assets/css/output.css` is the compiled Tailwind file, committed to the repo. It is what `layouts/partials/head/css.html` loads, and both `npm run build` and `npm run watch` write to it.
 - `public/` and `resources/` are generated build output.
+- Colors, type sizes, durations and easing are tokens at the top of `assets/css/input.css`. `data-theme` on `<html>` switches the color set. `assets/js/theme-init.js` is inlined in `<head>` so the theme is set before first paint, and `assets/js/main.js` is bundled with Hugo's `js.Build`.
+- Fonts are self-hosted in `static/fonts/`: Inter 400 and 600 and JetBrains Mono 400 and 700, in the `latin` and `vietnamese` subsets, with their OFL licences beside them. To refresh them, run `npm pack @fontsource/inter@5.3.0 @fontsource/jetbrains-mono@5.3.0` in an empty directory, unpack both, and copy `files/<family>-<subset>-<weight>-normal.woff2` from each. Keep the total under 200 KB.
 
 ## Posts
 

@@ -1,5 +1,9 @@
-<div class="mt-16 flex flex-col items-center">
-  <div class="mb-8 text-sm text-gray-500">
-    <span>(C) {{ now.Year }}. {{ site.Title }} all rights reserved.</span>
-  </div>
-</div>
+<footer class="site-footer wrap">
+  <p>
+    © {{ now.Year }} {{ site.Params.username }} ·
+    <a href="{{ site.Params.github }}" target="_blank" rel="noopener noreferrer"
+      >github</a
+    >
+    · <a href="/index.xml">rss</a> · built with hugo
+  </p>
+</footer>

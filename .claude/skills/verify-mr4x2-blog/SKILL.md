@@ -54,6 +54,8 @@ node $V/drive.mjs --run RUN_ID --name JOURNEY [--no-js] [--width 390] steps.json
 | `{"eval": "<js expr>"}` | Record a value. |
 | `{"scroll": {"role": "heading", "name": "…"}}` | Scroll the target into the middle of the viewport, which also triggers lazy images there. |
 | `{"shot": "label"}` / `{"shot": "label", "viewport": true}` / `{"dom": "label"}` | Save a full-page PNG (capped at 4000 px, with `truncatedAt` recorded in `results.json`), a PNG of the viewport only, or the current DOM as HTML. |
+| `{"media": {"prefers-color-scheme": "dark"}}` | Emulate CSS media features for the rest of the journey (`prefers-color-scheme`, `prefers-reduced-motion`). Headless Chromium delivers a media-query change only when a frame runs, so follow it with a nested `requestAnimationFrame` wait. |
+| `{"early": "<js expr>"}` | Arm a probe for the next navigation. In its first frame the page stores the JSON of the expression in `data-first-frame` on `<html>`, so an `expect` can prove what the first paint looked like. |
 | `{"text": "label"}` | Save the theme's visible text as `NN-label.rendered.txt` and fail the step on any slop pattern in it. See Slop check. |
 
 - Expressions run in an isolated world, so they also work with `--no-js`. They can use `$(target)` and `$$(target)`, where a target is a selector string or `{role, name}`, plus `visible(el)` and `nameOf(el)`. The roles are `button`, `link`, `searchbox`, `heading`, `status`, `group` and `listitem`.
