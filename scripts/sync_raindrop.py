@@ -129,6 +129,10 @@ def main(argv=None):
     if missing:
         print(f"missing environment variable(s): {', '.join(missing)}", file=sys.stderr)
         return 2
+    # Raindrop reads 0 as every bookmark and -1 as Unsorted, which would publish private ones.
+    if not (collection_id.isdigit() and int(collection_id) > 0):
+        print("RAINDROP_COLLECTION_ID must be the Reading collection's numeric ID", file=sys.stderr)
+        return 2
 
     try:
         entries = build_entries(fetch_all(make_get_page(token, collection_id)))

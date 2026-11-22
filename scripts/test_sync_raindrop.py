@@ -1,7 +1,11 @@
+import io
+import json
 import os
 import sys
 import tempfile
 import unittest
+import urllib.error
+from contextlib import redirect_stderr, redirect_stdout
 from unittest import mock
 
 sys.path.insert(0, os.path.dirname(__file__))
@@ -115,23 +119,85 @@ class BuildAndRenderTests(unittest.TestCase):
         sr.check_not_wiping("[]", [])
 
 
+TOKEN = "secret-token-value"
+ENV = {"RAINDROP_TOKEN": TOKEN, "RAINDROP_COLLECTION_ID": "77506144"}
+OLD = '[{"title": "keep me"}]\n'
+
+
+def page(items):
+    return {"result": True, "items": items, "count": len(items)}
+
+
+def run_main(out, *responses, env=ENV):
+    replies = iter(responses)
+
+    def urlopen(req, timeout=None):
+        reply = next(replies)
+        if isinstance(reply, Exception):
+            raise reply
+        return io.BytesIO(json.dumps(reply).encode())
+
+    stdout, stderr = io.StringIO(), io.StringIO()
+    with mock.patch.dict(os.environ, env), mock.patch.object(
+        sr.urllib.request, "urlopen", side_effect=urlopen
+    ) as opened, redirect_stdout(stdout), redirect_stderr(stderr):
+        code = sr.main(["--output", out])
+    return code, stdout.getvalue(), stderr.getvalue(), opened
+
+
 class MainTests(unittest.TestCase):
-    def test_failed_run_leaves_existing_file_untouched(self):
-        with tempfile.TemporaryDirectory() as d:
-            out = os.path.join(d, "reading.json")
-            old = '[{"title": "keep me"}]\n'
-            with open(out, "w", encoding="utf-8") as f:
-                f.write(old)
-            before = os.stat(out).st_mtime_ns
-            env = {"RAINDROP_TOKEN": "t", "RAINDROP_COLLECTION_ID": "1"}
-            with mock.patch.dict(os.environ, env), mock.patch.object(
-                sr, "fetch_all", side_effect=sr.SyncError("boom")
-            ):
-                self.assertEqual(sr.main(["--output", out]), 1)
-            with open(out, encoding="utf-8") as f:
-                self.assertEqual(f.read(), old)
-            self.assertEqual(os.stat(out).st_mtime_ns, before)
-            self.assertEqual(os.listdir(d), ["reading.json"])
+    def setUp(self):
+        tmp = tempfile.TemporaryDirectory()
+        self.addCleanup(tmp.cleanup)
+        self.dir = tmp.name
+        self.out = os.path.join(self.dir, "reading.json")
+
+    def write_old(self):
+        with open(self.out, "w", encoding="utf-8") as f:
+            f.write(OLD)
+
+    def assert_untouched(self, before):
+        with open(self.out, encoding="utf-8") as f:
+            self.assertEqual(f.read(), OLD)
+        after = os.stat(self.out)
+        self.assertEqual((after.st_ino, after.st_mtime_ns), (before.st_ino, before.st_mtime_ns))
+        self.assertEqual(os.listdir(self.dir), ["reading.json"])
+
+    def test_http_error_leaves_existing_file_untouched(self):
+        self.write_old()
+        before = os.stat(self.out)
+        error = urllib.error.HTTPError("https://api.raindrop.io", 401, "Unauthorized", {}, None)
+        code, stdout, stderr, _ = run_main(self.out, error)
+        self.assertEqual(code, 1)
+        self.assertNotIn(TOKEN, stdout + stderr)
+        self.assert_untouched(before)
+
+    def test_empty_response_never_wipes_existing_bookmarks(self):
+        self.write_old()
+        before = os.stat(self.out)
+        code, _, _, _ = run_main(self.out, page([]))
+        self.assertEqual(code, 1)
+        self.assert_untouched(before)
+
+    def test_repeat_run_with_same_bookmarks_leaves_file_alone(self):
+        code, _, _, _ = run_main(self.out, page([item()]))
+        self.assertEqual(code, 0)
+        with open(self.out, encoding="utf-8") as f:
+            self.assertEqual([e["title"] for e in json.load(f)], ["BlueStore"])
+        first = os.stat(self.out)
+        code, stdout, _, _ = run_main(self.out, page([item()]))
+        self.assertEqual(code, 0)
+        self.assertIn("unchanged", stdout)
+        again = os.stat(self.out)
+        self.assertEqual((again.st_ino, again.st_mtime_ns), (first.st_ino, first.st_mtime_ns))
+
+    def test_rejects_collection_id_that_is_not_one_collection(self):
+        for collection_id in ("0", "-1", "abc"):
+            with self.subTest(collection_id=collection_id):
+                code, _, _, opened = run_main(self.out, env={**ENV, "RAINDROP_COLLECTION_ID": collection_id})
+                self.assertEqual(code, 2)
+                self.assertFalse(opened.called)
+                self.assertFalse(os.path.exists(self.out))
 
     def test_crash_during_write_leaves_existing_file_untouched(self):
         with tempfile.TemporaryDirectory() as d:
