@@ -9,7 +9,7 @@ A personal reading log. When I finish a good technical article by someone else, 
 ## Goals
 
 - Save with Raindrop.io (iPhone share sheet, browser extension), with tags and a note added there.
-- `/reading` lists every Bookmark in the Reading collection, newest first, grouped by month, with a tag filter and a text search.
+- `/reading` lists every Bookmark in the Reading collection, as one flat list, newest first, with a tag filter and a text search.
 - New Bookmarks go live without any manual step, within about an hour.
 - A copy of every Bookmark is kept in git, so leaving Raindrop later loses nothing.
 
@@ -23,7 +23,7 @@ A personal reading log. When I finish a good technical article by someone else, 
 | 4 | Page name and menu | "Reading" at `/reading`, in the header between Tags and About. |
 | 5 | How fast it updates | Hourly sync. |
 | 6 | Build now or after the new theme (#16)? | Now. The layout is one self-contained file, to be ported when the theme changes. |
-| 7 | List shape | Grouped by month ("November 2026"), newest first, no pagination. |
+| 7 | List shape | One flat list, newest first, no pagination, like pliutau.com/reading-list. The author picked this from mockups on 2026-11-22, replacing the first answer (grouped by month). |
 
 ## Non-goals
 
@@ -78,7 +78,7 @@ A JSON array, newest first. Each entry:
 - `content/reading/index.md` sets `title: Reading`, a `summary` for the social preview, `layout: reading` and `build: { list: never }`, which keeps it out of "All Posts". It has no `tags`.
 - `layouts/_default/reading.html` renders `site.Data.reading`:
   - A search box and tag buttons (all tags, most used first) at the top, then a "N of M" count. Search matches the title, site, tags, Note and Excerpt, ignoring case. One tag can be active at a time.
-  - Month headings ("November 2026"), and under each one a row per bookmark: day, title linked with `target="_blank" rel="noopener"`, site, tags, and the Note in italics when there is one. A heading hides when the filter leaves it empty.
+  - One flat list with a row per bookmark: the Read date (`2026-11-21`), the title linked with `target="_blank" rel="noopener"`, `- site`, and the Note in italics under it when there is one. Rows show no tags; the buttons above still filter by them.
   - The filter is about 30 lines of inline vanilla JS. Clicking a tag sets `#tag=<tag>` in the URL, so a filtered view can be linked. Without JS the full list still shows, and the filter controls stay hidden.
   - Empty state: "Nothing here yet."
 - `hugo.toml` adds a menu entry, `Reading`, between Tags and About.

@@ -10,21 +10,22 @@
       </div>
 
       {{ if $entries }}
-        {{/* Tag keys replace spaces so data-tags can stay space-separated. */}}
         {{ $counts := dict }}
+        {{ $labels := dict }}
         {{ range $entries }}
           {{ range .tags }}
             {{ $key := replace . " " "-" }}
             {{ $counts = merge $counts (dict $key (add 1 (or (index $counts $key) 0))) }}
+            {{ $labels = merge $labels (dict $key .) }}
           {{ end }}
         {{ end }}
-        {{/* Zero-padded inverse count first, so a plain ascending sort gives count descending, then alphabetical. */}}
-        {{ $sortKeys := slice }}
-        {{ range $tag, $n := $counts }}
-          {{ $sortKeys = $sortKeys | append (printf "%05d|%s" (sub 99999 $n) $tag) }}
+        {{ $tagsByCountThenName := slice }}
+        {{ range $key, $n := $counts }}
+          {{ $tagsByCountThenName = $tagsByCountThenName | append (printf "%05d|%s" (sub 99999 $n) $key) }}
         {{ end }}
 
-        <div id="reading" class="space-y-8">
+
+        <div id="reading" class="space-y-6">
           <div class="space-y-4">
             <input
               type="search"
@@ -48,80 +49,56 @@
               >
                 All
               </button>
-              {{ range sort $sortKeys }}
-                {{ $tag := substr . 6 }}
+              {{ range sort $tagsByCountThenName }}
+                {{ $key := substr . 6 }}
                 <button
                   type="button"
-                  data-tag="{{ $tag }}"
+                  data-tag="{{ $key }}"
                   aria-pressed="false"
                   class="rounded-full border border-gray-300 px-3 py-1 text-sm text-gray-700 hover:border-indigo-500 aria-pressed:border-indigo-500 aria-pressed:bg-indigo-500 aria-pressed:text-white"
                 >
-                  {{ $tag }}
+                  {{ index $labels $key }}
                 </button>
               {{ end }}
             </div>
             <p role="status" hidden class="text-sm text-gray-500">
-              {{ len $entries }} of {{ len $entries }}
+              {{ len $entries }} of
+              {{ len $entries }}
             </p>
           </div>
 
-          {{ $month := "" }}
-          {{ range $entries }}
-            {{ $m := substr .date 0 7 }}
-            {{ if ne $m $month }}
-              {{ if $month }}
-                </ul>
-                </section>
+          <ul class="list-disc space-y-3 pl-5 marker:text-gray-400">
+            {{ range $entries }}
+              {{ $tagKeys := slice }}
+              {{ range .tags }}
+                {{ $tagKeys = $tagKeys | append (replace . " " "-") }}
               {{ end }}
-              {{ $month = $m }}
-              <section data-month="{{ $m }}" class="space-y-2">
-              <h2
-                class="border-b border-gray-200 pb-2 text-xl font-semibold text-gray-900"
+              <li
+                data-tags="{{ delimit $tagKeys " " }}"
+                data-search="{{ lower (printf "%s %s %s %s %s" .title .site (delimit .tags " ") .note .excerpt) }}"
+                class="leading-7 text-gray-700 [overflow-wrap:anywhere]"
               >
-                {{ time.Format "January 2006" (time.AsTime .date) }}
-              </h2>
-              <ul class="divide-y divide-gray-100">
-            {{ end }}
-            {{ $tags := slice }}
-            {{ range .tags }}
-              {{ $tags = $tags | append (replace . " " "-") }}
-            {{ end }}
-            <li
-              data-tags="{{ delimit $tags " " }}"
-              data-search="{{ lower (printf "%s %s %s %s %s" .title .site (delimit .tags " ") .note .excerpt) }}"
-              class="flex gap-4 py-4"
-            >
-              <time
-                datetime="{{ .date }}"
-                class="w-6 shrink-0 pt-0.5 text-right text-sm tabular-nums text-gray-400"
-                >{{ time.Format "2" (time.AsTime .date) }}</time
-              >
-              <div class="min-w-0 flex-1 space-y-1">
-                <div class="flex flex-wrap items-baseline gap-x-3 gap-y-1">
-                  <a
-                    href="{{ .url }}"
-                    target="_blank"
-                    rel="noopener"
-                    class="break-words font-medium text-gray-900 hover:text-indigo-500"
-                    >{{ .title }}</a
-                  >
-                  <span class="text-sm text-gray-500">{{ .site }}</span>
-                  {{ range .tags }}
-                    <a
-                      href="#tag={{ replace . " " "-" }}"
-                      class="text-xs font-medium uppercase text-indigo-500 hover:text-indigo-600"
-                      >{{ . }}</a
-                    >
-                  {{ end }}
-                </div>
+                <time
+                  datetime="{{ .date }}"
+                  class="font-mono text-sm text-gray-500"
+                  >{{ .date }}</time
+                >
+                <a
+                  href="{{ .url }}"
+                  target="_blank"
+                  rel="noopener"
+                  class="font-semibold text-indigo-600 hover:underline"
+                  >{{ .title }}</a
+                >
+                <span class="text-gray-500">- {{ .site }}</span>
                 {{ with .note }}
-                  <p class="italic text-gray-600">{{ . }}</p>
+                  <p class="whitespace-pre-line text-sm italic text-gray-500">
+                    {{- . -}}
+                  </p>
                 {{ end }}
-              </div>
-            </li>
-          {{ end }}
+              </li>
+            {{ end }}
           </ul>
-          </section>
         </div>
 
         <script>
@@ -132,18 +109,20 @@
             var status = root.querySelector("[role=status]");
             var buttons = [].slice.call(group.querySelectorAll("button"));
             var rows = [].slice.call(root.querySelectorAll("li[data-tags]"));
-            var sections = [].slice.call(
-              root.querySelectorAll("section[data-month]"),
-            );
+            var known = buttons.map(function (b) {
+              return b.dataset.tag;
+            });
 
             function activeTag() {
               var m = /^#tag=(.*)$/.exec(location.hash);
               if (!m) return "";
+              var tag;
               try {
-                return decodeURIComponent(m[1]);
+                tag = decodeURIComponent(m[1]);
               } catch (e) {
-                return m[1];
+                tag = m[1];
               }
+              return known.indexOf(tag) === -1 ? "" : tag;
             }
 
             function apply() {
@@ -157,9 +136,6 @@
                 li.hidden = !ok;
                 if (ok) shown++;
               });
-              sections.forEach(function (s) {
-                s.hidden = !s.querySelector("li:not([hidden])");
-              });
               buttons.forEach(function (b) {
                 b.setAttribute("aria-pressed", String(b.dataset.tag === tag));
               });
@@ -172,7 +148,11 @@
               if (b.dataset.tag) {
                 location.hash = "tag=" + encodeURIComponent(b.dataset.tag);
               } else {
-                history.pushState(null, "", location.pathname + location.search);
+                history.pushState(
+                  null,
+                  "",
+                  location.pathname + location.search,
+                );
                 apply();
               }
             });
