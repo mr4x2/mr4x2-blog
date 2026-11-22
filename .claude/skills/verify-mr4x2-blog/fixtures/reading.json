@@ -1,0 +1,7 @@
+[
+  {"title": "How the OSD allocator works", "url": "https://ceph.io/en/news/blog/allocator", "site": "ceph.io", "date": "2026-11-21", "tags": ["ceph", "storage"], "note": "Good diagram of the allocator", "excerpt": "about bluestore"},
+  {"title": "Untagged article", "url": "https://example.org/a", "site": "example.org", "date": "2026-11-03", "tags": [], "note": "", "excerpt": ""},
+  {"title": "https://x.com/someone/status/2010751592346030461?s=20&t=SBD2ubNBtgb5DvFeHEaLongTrackingTokenWithNoBreaks", "url": "https://x.com/someone/status/2010751592346030461?s=20&t=SBD2ubNBtgb5DvFeHEaLongTrackingTokenWithNoBreaks", "site": "example.org", "date": "2026-10-28", "tags": ["machine learning"], "note": "First line\nSecond line", "excerpt": ""},
+  {"title": "Escaping check", "url": "https://example.org/b", "site": "example.org", "date": "2026-10-15", "tags": ["linux", "storage"], "note": "<b>bold</b> & \"quotes\"", "excerpt": ""},
+  {"title": "Tiếng Việt", "url": "https://example.vn/c", "site": "example.vn", "date": "2026-10-02", "tags": ["linux"], "note": "", "excerpt": ""}
+]
