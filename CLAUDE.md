@@ -31,7 +31,7 @@ Pushes to `main` trigger `.github/workflows/hugo.yml`. It runs a `hugo` build ch
 
 The `Dockerfile` has two stages. The build stage runs `hugo --gc --minify` on `hugomods/hugo:exts-0.154.5`, then `npx -y pagefind@1.5.0 --site public` to write the search index to `public/pagefind/`. The serve stage is `nginx:alpine` with `nginx.conf`, and it holds only `public/`. Keep Hugo in the `Dockerfile` and in the CI matrix on the same version. Keep Pagefind on 1.5.0, because 1.6.0 dies with `Illegal instruction` on the server's CPU (Xeon E5-2696 v2, no AVX2).
 
-The site is static, so drafts never go live. The Hugo `baseURL` comes from `hugo.toml`, not from `BASE_URL`.
+The site is static, so drafts never go live. The Hugo `baseURL` comes from `hugo.toml`. The `Dockerfile` takes a `BASE_URL` build arg that overrides it and defaults to `https://mr4x2.com/`, so CI and the live site build with the default. The verify skill's `prod` mode sets it to a local preview URL.
 
 On the server, `docker-compose.yaml` runs the image behind Traefik on port 80. Watchtower, in the same compose file, checks for a new `:latest` every 5 minutes and recreates the blog container with the old container's command and labels. It swaps only the image. A change to `docker-compose.yaml` applies only after `git pull && docker compose up -d` in the server's checkout.
 

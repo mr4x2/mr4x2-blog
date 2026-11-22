@@ -5,7 +5,7 @@ This directory is the maintained source for verifying what readers and the autho
 ## Baseline preconditions
 
 - Work from the repo root, with `V=.claude/skills/verify-mr4x2-blog/scripts`.
-- Launch a disposable instance with `$V/verify.sh launch local` or `$V/verify.sh launch prod`, and note its `RUN_ID` and `URL`.
+- Launch a disposable instance with `$V/verify.sh launch local` or `$V/verify.sh launch prod`, and note its `RUN_ID` and `URL`. `prod` is the static nginx image that production serves, so it has no drafts and no live reload. Relaunch it after every change.
 - `$V/verify.sh doctor RUN_ID` reports `doctor: healthy` before any journey.
 - The content is whatever is in the working tree. On `main` today that's two Posts (`A great trip in Thailand`, `Memorable days in France`) and the About page.
 - Never drive https://mr4x2.com or the `mr4x2-blog-hugo-blog-1` container, except for the read-only checks in `deploy.md`.
