@@ -28,3 +28,13 @@ Personal Hugo blog (mr4x2.com): travel and tech posts in English.
 ## Deploy
 
 Pushes to `main` trigger `.github/workflows/hugo.yml`. It runs a `hugo` build check, then pushes a Docker image (`hugomods/hugo:exts` plus the repo source) to Docker Hub as `:latest`. On the server, `docker-compose.yaml` runs `hugo server -D` from that image behind Traefik, so the live site is built when the container starts and drafts are published. Watchtower, in the same compose file, checks for a new `:latest` every 5 minutes and recreates the blog container, so a merge to `main` goes live on its own. PRs run the build check and the Docker build but push nothing. Only `main` pushes, tagging each image `:latest` and `:<commit sha>`. Changes to `docker-compose.yaml` itself only apply after `git pull` and `docker compose up -d` in the server's checkout.
+
+## Reading page
+
+`/reading` lists the Bookmarks in the author's Raindrop Reading collection. Terms (Bookmark, Note, Excerpt, Read date) are defined in `CONTEXT.md`.
+
+- Data flow: Raindrop → `.github/workflows/sync-reading.yml` (hourly) runs `scripts/sync_raindrop.py` → commits `data/reading.json` to `main` → dispatches `hugo.yml` → Docker Hub → Watchtower.
+- `data/reading.json` is generated. Don't edit it by hand: the next sync overwrites it, and a Bookmark deleted in Raindrop disappears from the page.
+- `layouts/_default/reading.html` renders it with `site.Data.reading` (`hugo.Data` doesn't exist in Hugo 0.145). The page builds and shows `Nothing here yet.` when the file is missing or `[]`.
+- Run the sync locally with `set -a; . ./.env; set +a; python3 scripts/sync_raindrop.py`. It needs `RAINDROP_TOKEN` (a Raindrop test token) and `RAINDROP_COLLECTION_ID`. Add `--output <file>` to write somewhere else.
+- Run the sync tests with `python3 -m unittest discover -s scripts -v`.
