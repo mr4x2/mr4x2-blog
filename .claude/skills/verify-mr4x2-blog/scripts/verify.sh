@@ -111,7 +111,7 @@ cmd_stop() {
     prod)
       docker logs "$CONTAINER" >"$RUN_DIR/server.log" 2>&1 || true
       docker rm -f "$CONTAINER" >/dev/null 2>&1 || true
-      docker rmi "$IMAGE" >/dev/null 2>&1 || true
+      if [ -n "${IMAGE:-}" ]; then docker rmi "$IMAGE" >/dev/null 2>&1 || true; fi
       ;;
   esac
   rm -rf "$RUN_DIR/chrome-profile"
