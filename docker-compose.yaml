@@ -17,6 +17,16 @@ services:
       - "traefik.docker.network=traefik_cloudflare"
       - "traefik.http.routers.hugo-blog.tls=true"
       - "traefik.http.routers.hugo-blog.tls.certresolver=production"
+      - "com.centurylinklabs.watchtower.enable=true"
     networks:
       - traefik_cloudflare
-    
+
+  # Pulls a new :latest every 5 minutes and recreates hugo-blog.
+  # Only containers with the enable label above are touched.
+  # nickfedor/watchtower is the maintained fork; containrrr/watchtower is archived.
+  watchtower:
+    image: nickfedor/watchtower:1.24.1
+    command: --label-enable --cleanup --interval 300
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    restart: unless-stopped
