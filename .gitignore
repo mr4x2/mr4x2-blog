@@ -11,3 +11,6 @@ npm-debug.log
 .DS_Store
 Thumbs.db
 .env
+
+# Verification runs (evidence, logs)
+.verify/
