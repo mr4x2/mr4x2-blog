@@ -68,15 +68,17 @@ const { targetId } = await send("Target.createTarget", { url: "about:blank" });
 ({ sessionId: session } = await send("Target.attachToTarget", { targetId, flatten: true }));
 await send("Page.enable"); await send("Runtime.enable");
 // Size the real window so its inner area equals the emulated viewport; a smaller real surface makes captures tile.
+let windowId, frameH = 0;
 {
   const probe = async () => (await send("Runtime.evaluate", { expression: "[innerWidth, innerHeight]", returnByValue: true })).result.value;
-  const { windowId } = await send("Browser.getWindowForTarget", { targetId });
+  ({ windowId } = await send("Browser.getWindowForTarget", { targetId }));
   for (let i = 0; i < 3; i++) {
     const [iw, ih] = await probe();
     if (iw === width && ih === height) break;
     const { bounds } = await send("Browser.getWindowBounds", { windowId });
     await send("Browser.setWindowBounds", { windowId, bounds: { width: bounds.width + (width - iw), height: bounds.height + (height - ih) } });
   }
+  frameH = (await send("Browser.getWindowBounds", { windowId })).bounds.height - height;
 }
 await send("Emulation.setDeviceMetricsOverride", { width, height, deviceScaleFactor: 1, mobile: width < 600 });
 if (noJs) await send("Emulation.setScriptExecutionDisabled", { value: true });
@@ -145,14 +147,21 @@ for (const s of steps) {
     } else if (s.eval !== undefined) {
       rec.result = await evaluate(s.eval);
     } else if (s.shot !== undefined) {
-      // Full page: capture beyond the viewport, capped, since a long post renders every lazy photo at once and stalls Chromium.
-      let params = { format: "png" };
+      // Full page: grow the real window and the viewport to the content height (capped), capture, restore.
+      // Capturing beyond a smaller real window tiles it; past ~4000 px a long post renders every lazy photo at once and stalls Chromium.
+      let h = height;
       if (s.viewport !== true) {
         const contentH = Math.ceil((await send("Page.getLayoutMetrics")).cssContentSize.height);
         if (contentH > FULL_MAX) rec.truncatedAt = FULL_MAX;
-        params = { format: "png", captureBeyondViewport: true, clip: { x: 0, y: 0, width, height: Math.min(contentH, FULL_MAX), scale: 1 } };
+        h = Math.max(height, Math.min(contentH, FULL_MAX));
       }
-      const shot = await send("Page.captureScreenshot", params);
+      const resize = async (vh) => {
+        await send("Browser.setWindowBounds", { windowId, bounds: { height: vh + frameH } });
+        await send("Emulation.setDeviceMetricsOverride", { width, height: vh, deviceScaleFactor: 1, mobile: width < 600 });
+      };
+      if (h !== height) { await resize(h); await new Promise((r) => setTimeout(r, 200)); }
+      const shot = await send("Page.captureScreenshot", { format: "png" });
+      if (h !== height) await resize(height);
       const f = join(out, `${String(n).padStart(2, "0")}-${label(s, s.shot)}.png`); writeFileSync(f, Buffer.from(shot.data, "base64")); rec.result = f;
     } else if (s.dom !== undefined) {
       const f = join(out, `${String(n).padStart(2, "0")}-${label(s, s.dom)}.html`); writeFileSync(f, await evaluate("document.documentElement.outerHTML")); rec.result = f;

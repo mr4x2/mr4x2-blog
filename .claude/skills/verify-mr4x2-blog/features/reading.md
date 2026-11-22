@@ -57,6 +57,7 @@ Preconditions:
 ## Gotchas
 
 - With live reload, editing `data/reading.json` re-renders the page, but an open journey keeps the old DOM. Run a new `goto` afterwards.
+- A `goto` that changes only the hash (`/reading/` to `/reading/#tag=x`) doesn't reload the page, so the search box keeps its query, and search and tag combine (for example `0 of 4`). To prove a shared link, start a fresh journey or `goto` another page first.
 - `#tag=` values are lowercase, because the sync lowercases Bookmark tags. `#tag=Ceph` matching nothing is expected behavior.
 - The page must not appear in "All Posts" (`home.md`, `home-no-reading`) or add Bookmark tags to Tags (`tags.md`). Check both after any change here.
 - A fixture `data/reading.json` must never be committed. Restore it with `git checkout -- data/reading.json`, or delete it if the file isn't tracked yet.
