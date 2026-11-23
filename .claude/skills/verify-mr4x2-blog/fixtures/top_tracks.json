@@ -1,0 +1,27 @@
+[
+  {
+    "title": "Holocene",
+    "artists": ["Bon Iver"],
+    "url": "https://open.spotify.com/track/fixture1"
+  },
+  {
+    "title": "Motion Sickness",
+    "artists": ["Phoebe Bridgers", "Julien Baker"],
+    "url": "https://open.spotify.com/track/fixture2"
+  },
+  {
+    "title": "Everything In Its Right Place (Live From The Basement Sessions, Remastered Deluxe Edition With Extra Long Title)",
+    "artists": ["Radiohead"],
+    "url": "https://open.spotify.com/track/fixture3"
+  },
+  {
+    "title": "Tiếng Việt Và Những Đêm Dài",
+    "artists": ["Đen"],
+    "url": "https://open.spotify.com/track/fixture4"
+  },
+  {
+    "title": "Rock & \"Roll\" <b>",
+    "artists": ["Plain Artist"],
+    "url": "https://open.spotify.com/track/fixture5"
+  }
+]

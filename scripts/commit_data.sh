@@ -5,7 +5,7 @@ set -euo pipefail
 path=$1
 message=$2
 
-# Untracked files are invisible to `git diff`, so every change check uses status.
+# `git diff` ignores untracked files, so every change check uses status.
 if [ -z "$(git status --porcelain -- "$path")" ]; then
   echo "$path unchanged"
   exit 0

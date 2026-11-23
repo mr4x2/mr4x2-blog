@@ -1,4 +1,4 @@
-<div class="sec reveal" style="--i: 1">
+<div class="sec reveal" style="--i: 2">
   <p class="cmd">$ <b>ls -t ~/posts</b></p>
   <ul class="tag-line">
     {{ range site.Taxonomies.tags.ByCount }}
@@ -11,7 +11,7 @@
 
 <ul class="posts">
   {{ range $i, $post := .Paginator.Pages }}
-    {{ partial "post-summary.html" (dict "post" $post "i" (add $i 2)) }}
+    {{ partial "post-summary.html" (dict "post" $post "i" (add $i 3)) }}
   {{ end }}
 </ul>
 
