@@ -68,7 +68,7 @@ The home page lists the author's Top tracks under `whoami`. Terms are defined in
 - `layouts/partials/home/top-tracks.html` renders it with `site.Data.top_tracks`. Nothing renders when the file is missing or `[]`.
 - Run the sync locally with `set -a; . ./.env; set +a; python3 scripts/sync_top_tracks.py`. It needs `SPOTIFY_CLIENT_ID`, `SPOTIFY_CLIENT_SECRET` and `SPOTIFY_REFRESH_TOKEN`. Add `--output <file>` to write somewhere else.
 - Run the tests with `python3 -m unittest discover -s scripts -v`.
-- The refresh token expires 6 months after the login. When the sync fails with `invalid_grant`, run `python3 scripts/spotify_auth.py`, then `gh secret set SPOTIFY_REFRESH_TOKEN`. Until then the site keeps the last list.
+- The refresh token expires 6 months after the login. When the sync fails with `the Spotify login expired or was revoked`, run `python3 scripts/spotify_auth.py`, then `gh secret set SPOTIFY_REFRESH_TOKEN`. Until then the site keeps the last list.
 
 ## Visual rules you can spot in a diff
 
