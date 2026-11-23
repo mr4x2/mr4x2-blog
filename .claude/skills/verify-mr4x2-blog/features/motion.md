@@ -12,7 +12,7 @@ The motion that isn't the home intro. The logo cursor blinks ten times, then sta
 - `motion-photos` hides a photo that hasn't loaded yet, then fades it in.
 - `motion-toc` fades the TOC in over 200ms and out over 150ms.
 - `motion-hover` gives header buttons a hover color and border, for mouse pointers only, and makes the chip's fill and border follow its text color.
-- `motion-bee-sign` puts a 14px bee after `built with hugo` in the footer. It sits still and flaps its wings twice on hover, for mouse pointers with full motion only. The 404 bee is in `not-found.md`.
+- `motion-bee-sign` puts a 14px bee after `built with hugo` in the footer. It sits still and flaps its wings twice on hover, for mouse pointers with full motion only. It is also the garden mode button (`garden.md`). The 404 bee is in `not-found.md`.
 
 ## How to get to it (user POV)
 

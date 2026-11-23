@@ -22,6 +22,7 @@ Personal Hugo blog (mr4x2.com): travel and tech posts in English.
 - Thumbnails on post rows come from the front-matter `image`. `hugo.toml` mounts `static/trip-in-*` at `assets/photos`, so Hugo can resize them to small WebP files. A mount you define replaces Hugo's default mounts for that component, so the defaults are listed again there.
 - Search is Pagefind, pinned to 1.5.0, because 1.6.0 dies with `Illegal instruction` on the server's CPU (no AVX2). `assets/js/search.js` loads `/pagefind/pagefind.js` with a dynamic `import()` on the first open. Only pages with `data-pagefind-body` are indexed: posts and About.
 - The Search and theme buttons need JavaScript, so `.needs-js` hides them until `theme-init.js` has set `data-theme`.
+- Garden mode is opt-in: the footer bee is its button, and `mk-garden` in localStorage remembers it. `theme-init.js` sets `data-garden` on `<html>` before first paint, so CSS shows the flower bed (`partials/garden.html`) at once, and `assets/js/garden.js` adds the bees. Bees stay in the bed and in the margins beside the text column, never over the text. Only the bee that follows the pointer crosses it.
 - Colors, type sizes, durations and easing are tokens at the top of `assets/css/input.css`. `data-theme` on `<html>` switches the color set. `assets/js/theme-init.js` is inlined in `<head>` so the theme is set before first paint, and `assets/js/main.js` is bundled with Hugo's `js.Build`.
 - Code blocks use Chroma classes with two palettes at the end of `assets/css/input.css`, one per `data-theme`. They come from `hugo gen chromastyles --style=github` (light) and `--style=github-dark` (dark), with each selector prefixed by `:root[data-theme="light"]` or `"dark"` and the `.bg`, `.chroma`, line-number and `.hl` rules and `font-weight:bold` dropped.
 - The typography plugin declares `.prose` in `@layer utilities`, so every `.prose` override in `input.css` lives in that layer too.
@@ -74,18 +75,18 @@ The home page lists the author's Top tracks under `whoami`. Terms are defined in
 
 The look is style B, a clean blog with a terminal flavor. Full spec: `docs/superpowers/specs/2026-11-22-new-theme-design.md`. Each rule is one a reviewer can catch in a diff.
 
-1. **Tokens only.** Colors, font sizes, durations and easing curves are tokens in `assets/css/input.css`. Templates and scripts never declare a hex color, a `px` font size, an `ms` duration or a `cubic-bezier`. The one exception is the typing speed, a named constant at the top of the intro script.
+1. **Tokens only.** Colors, font sizes, durations and easing curves are tokens in `assets/css/input.css`. Templates and scripts never declare a hex color, a `px` font size, an `ms` duration or a `cubic-bezier`. The exceptions are the typing speed and the bee pacing, named constants at the top of `intro.js` and `garden.js`.
 2. **No gradients, no `backdrop-filter`, no glass.** The sticky header is a flat `--bg` fill. The search popup's backdrop is a flat `--backdrop` color.
-3. **No emoji as icons.** Icons are inline SVG with Lucide paths, `stroke-width` 1.5, at 14px, 16px or 20px, one size per context. The bee in `partials/bee.html` is the one drawing of our own, in the same style: 20px on the 404 page, 14px in the footer. Emoji may appear only in post content the author wrote.
+3. **No emoji as icons.** Icons are inline SVG with Lucide paths, `stroke-width` 1.5, at 14px, 16px or 20px, one size per context. The bee in `partials/bee.html` and the flower in `partials/garden.html` are the only drawings of our own, in the same style: the bee is 20px on the 404 page and in the garden, 14px in the footer. Emoji may appear only in post content the author wrote.
 4. **Two weights.** Inter uses 400 for text and 600 for titles. JetBrains Mono uses 400, and 700 only for the logo. Never 500.
-5. **One accent color.** Green marks a terminal element or a link, and nothing else. No second accent, no decorative color.
+5. **One accent color.** Green marks a terminal element or a link, and nothing else. No second accent, no decorative color. Garden mode is the one exception: once the reader turns it on, the bees are yellow and the flowers colored, from the `--garden-*` tokens.
 6. **No left-border accent blocks.** The `whoami` line sits under its prompt with no border.
 7. **No cards around static text.** Post rows are separated by dashed dividers. The search popup is the only raised surface.
 8. **The type scale is closed** (`--fs-*`). A new size is a new token.
 9. **Motion changes only `transform`, `opacity` and color.** Never animate `height`, `margin` or position, and never use `blur` to bridge two states. View transitions are the one exception: the theme toggle grows the new theme as a `clip-path` circle, and the browser morphs a Post title between a list and the Post.
 10. **One focus ring**, declared once in `assets/css/input.css`: `:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }`.
 
-Dark mode is on purpose. Under `prefers-reduced-motion: reduce`, movement stops but opacity fades of 200ms stay, and the theme toggle cross-fades instead of growing a circle. Under `prefers-contrast: more`, the grays and the light green darken to pass WCAG contrast; it is still one accent.
+Dark mode is on purpose. Under `prefers-reduced-motion: reduce`, movement stops but opacity fades of 200ms stay, and the theme toggle cross-fades instead of growing a circle. The garden becomes a still picture: no bee flies or follows the pointer. Under `prefers-contrast: more`, the grays and the light green darken to pass WCAG contrast; it is still one accent.
 
 ## Avoid slop
 

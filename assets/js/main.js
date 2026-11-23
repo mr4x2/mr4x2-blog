@@ -1,3 +1,4 @@
+import { initGarden } from "./garden.js";
 import { initIntro } from "./intro.js";
 import { initSearch } from "./search.js";
 import { initTheme } from "./theme.js";
@@ -10,6 +11,7 @@ for (const el of document.querySelectorAll("[data-missing-path]")) {
 initTheme();
 initIntro();
 initSearch();
+initGarden();
 
 for (const img of document.querySelectorAll(".prose img")) {
   if (img.complete) continue;

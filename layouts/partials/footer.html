@@ -4,7 +4,19 @@
     <a href="{{ site.Params.github }}" target="_blank" rel="noopener noreferrer"
       >github</a
     >
-    · <a href="/index.xml">rss</a> · built with hugo
-    {{ partial "bee.html" "bee-sign" }}
+    · <a href="/index.xml">rss</a> ·
+    <span class="whitespace-nowrap"
+      >built with hugo
+      <button
+        type="button"
+        class="bee-btn needs-js"
+        data-garden-toggle
+        aria-pressed="false"
+        aria-label="Garden mode"
+        title="Garden mode"
+      >
+        {{ partial "bee.html" "bee-sign" }}
+      </button></span
+    >
   </p>
 </footer>

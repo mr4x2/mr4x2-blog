@@ -27,7 +27,7 @@ node $K/scripts/drive.mjs --run RUN_ID --name not-found-nojs --no-js $K/journeys
 ```
 
 - **`not-found.json`** opens `/no-such-page/`, checks that the server answers 404, samples the typing every 50 ms, checks that the bee has no animation while typing and flies after, waits for it to land and checks where and how it landed, checks the lines `$ cd /no-such-page/` and `bash: cd: /no-such-page/: No such file or directory` and that `mk-intro-seen` stays unset, then the heading and the header, saves a screenshot and the rendered text, and follows `cd ~` to `/`. Then it reloads the page under reduced motion and checks that the bee doesn't fly.
-- **`not-found-nojs.json`** checks the `/missing-page` fallback, that the link is still there, and that both bees are drawn.
+- **`not-found-nojs.json`** checks the `/missing-page` fallback, that the link is still there, that the 404 bee is drawn, and that the footer bee hides with the other JavaScript buttons.
 - **Proof.** Keep `not-found` and `not-found-nojs`.
 
 ## Gotchas
