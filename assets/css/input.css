@@ -91,6 +91,8 @@
   color-scheme: light;
   /* Garden mode is the one place for decorative color. */
   --garden-bee: #f4b400;
+  /* Black in both themes: light stripes on the dark page wash the bee out. */
+  --garden-stripe: #1b1b1a;
   --garden-wing: #d8ecf6;
   --garden-leaf: #4f9a5e;
   --garden-petal-a: #f28cb1;
@@ -751,6 +753,10 @@
   }
   :root[data-garden] .bee-body {
     fill: var(--garden-bee);
+    stroke: var(--garden-stripe);
+  }
+  :root[data-garden] .bee-stripes {
+    stroke: var(--garden-stripe);
   }
   :root[data-garden] .bee-wing {
     fill: var(--garden-wing);

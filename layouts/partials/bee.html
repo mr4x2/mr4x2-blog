@@ -1,4 +1,4 @@
-{{- /* The wings are their own paths so CSS can flap them. */ -}}
+{{- /* The wings and stripes are their own paths so CSS can flap the wings and color the stripes. */ -}}
 <svg
   class="bee {{ . }}"
   viewBox="0 0 24 24"
@@ -19,5 +19,6 @@
   />
   <ellipse class="bee-body" cx="14" cy="15" rx="6" ry="4.5" />
   <circle cx="5.5" cy="14.5" r="2.5" />
-  <path d="M12 10.8v8.4M16 10.8v8.4M20 15h2M4.5 12.2 3 9.5M6.8 12.3l.7-2.8" />
+  <path class="bee-stripes" d="M12 10.8v8.4M16 10.8v8.4" />
+  <path d="M20 15h2M4.5 12.2 3 9.5M6.8 12.3l.7-2.8" />
 </svg>
