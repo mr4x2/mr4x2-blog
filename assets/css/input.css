@@ -110,6 +110,8 @@
   --dur-blink: 1100ms;
   --dur-theme: 450ms;
   --dur-page: 250ms;
+  --dur-flight: 480ms;
+  --dur-flap: 120ms;
   --stagger: 60ms;
   --ease-strong: cubic-bezier(0.23, 1, 0.32, 1);
 
@@ -691,6 +693,70 @@
   .cmd a {
     color: var(--accent);
   }
+
+  .bee {
+    display: inline-block;
+    overflow: visible;
+  }
+  .bee-fly {
+    width: 1.25rem;
+    height: 1.25rem;
+    margin-left: 0.5rem;
+    vertical-align: -0.3125rem;
+    color: var(--muted);
+  }
+  .bee-sign {
+    width: 0.875rem;
+    height: 0.875rem;
+    margin-left: 0.25rem;
+    vertical-align: -0.1875rem;
+  }
+  .bee-wing {
+    transform-box: fill-box;
+  }
+  .bee-wing-front {
+    --flap: -25deg;
+    transform-origin: right bottom;
+  }
+  .bee-wing-back {
+    --flap: 25deg;
+    transform-origin: left bottom;
+  }
+  @keyframes bee-flap {
+    50% {
+      transform: rotate(var(--flap));
+    }
+  }
+  @keyframes bee-fly {
+    from {
+      opacity: 0;
+      transform: translate(1.5rem, -0.75rem) rotate(-10deg);
+    }
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    /* The 404 bee flies in with its line, so it starts when the typing ends, with the line's delay. */
+    .bee-fly {
+      animation: bee-fly var(--dur-flight) var(--ease-strong) both;
+      animation-delay: calc(var(--i, 0) * var(--stagger));
+    }
+    /* Four flaps last one flight. */
+    .bee-fly .bee-wing {
+      animation: bee-flap var(--dur-flap) ease-in-out 4;
+      animation-delay: calc(var(--i, 0) * var(--stagger));
+    }
+    .intro-pending .bee-fly,
+    .intro-typing .bee-fly,
+    .intro-pending .bee-fly .bee-wing,
+    .intro-typing .bee-fly .bee-wing {
+      animation: none;
+    }
+  }
+  @media (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference) {
+    .bee-sign:hover .bee-wing {
+      animation: bee-flap var(--dur-flap) ease-in-out 2;
+    }
+  }
+
   .comments {
     margin-top: 3rem;
   }

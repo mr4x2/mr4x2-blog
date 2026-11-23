@@ -1,13 +1,19 @@
 [
   {"goto": "/no-such-page/"},
   {"expect": "fetch('/no-such-page/').then(r => r.status)", "equals": 404, "label": "the server answers 404"},
-  {"expect": "new Promise(done => { const root = document.documentElement, log = []; const t = setInterval(() => { log.push({ cls: root.className, typed: $('[data-typed]').textContent, out: +getComputedStyle($$('main .cmd')[1]).opacity }); if (log.length >= 24) { clearInterval(t); const typing = log.filter(s => s.cls === 'intro-typing'); const lens = typing.map(s => s.typed.length); done({ typedWhileTyping: typing.length > 0, grows: lens.every((n, i) => i === 0 || n >= lens[i - 1]), errorHiddenWhileTyping: typing.every(s => s.out < 0.05), end: log[log.length - 1] }); } }, 50); })", "equals": {"typedWhileTyping": true, "grows": true, "errorHiddenWhileTyping": true, "end": {"cls": "", "typed": "cd /no-such-page/", "out": 1}}, "label": "the cd command types out, then the error answers it"},
+  {"expect": "new Promise(done => { const root = document.documentElement, log = []; const t = setInterval(() => { log.push({ cls: root.className, typed: $('[data-typed]').textContent, out: +getComputedStyle($$('main .cmd')[1]).opacity, bee: getComputedStyle($('.bee-fly')).animationName }); if (log.length >= 24) { clearInterval(t); const typing = log.filter(s => s.cls === 'intro-typing'); const lens = typing.map(s => s.typed.length); done({ typedWhileTyping: typing.length > 0, grows: lens.every((n, i) => i === 0 || n >= lens[i - 1]), errorHiddenWhileTyping: typing.every(s => s.out < 0.05), beeWaitsWhileTyping: typing.every(s => s.bee === 'none'), end: log[log.length - 1] }); } }, 50); })", "equals": {"typedWhileTyping": true, "grows": true, "errorHiddenWhileTyping": true, "beeWaitsWhileTyping": true, "end": {"cls": "", "typed": "cd /no-such-page/", "out": 1, "bee": "bee-fly"}}, "label": "the cd command types out, then the error answers it and the bee flies in"},
   {"expect": "$$('main .cmd').map(p => p.textContent.replace(/\\s+/g, ' ').trim())", "equals": ["$ cd /no-such-page/", "bash: cd: /no-such-page/: No such file or directory", "cd ~"], "label": "the path comes from the address bar"},
+  {"wait": "!document.getAnimations().some(a => String(a.animationName).startsWith('bee') && a.playState === 'running')", "timeout": 3000, "label": "the bee lands"},
+  {"expect": "(b => [b.getAttribute('aria-hidden'), getComputedStyle(b).animationDuration, getComputedStyle(b).animationDelay, getComputedStyle(b).opacity, new DOMMatrix(getComputedStyle(b).transform).isIdentity, $$('.bee-fly .bee-wing').map(w => getComputedStyle(w).animationIterationCount).join(' '), b.getBoundingClientRect().left > $({role: 'link', name: 'cd ~'}).getBoundingClientRect().right])($('.bee-fly'))", "equals": ["true", "0.48s", "0.06s", "1", true, "4 4", true], "label": "the bee flies in over 480ms with the cd ~ line, flapping four times, and lands right of the link"},
   {"expect": "sessionStorage.getItem('mk-intro-seen')", "equals": null, "label": "the 404 intro does not use up the home intro"},
   {"expect": "$('h1').textContent.trim()", "equals": "Page not found", "label": "the page has a heading"},
   {"expect": "$$('header nav a').length", "equals": 4, "label": "the header is there"},
   {"shot": "not-found"},
   {"text": "not-found"},
   {"click": {"role": "link", "name": "cd ~"}, "label": "link to the home page"},
-  {"wait": "location.pathname === '/'"}
+  {"wait": "location.pathname === '/'"},
+  {"media": {"prefers-reduced-motion": "reduce"}},
+  {"goto": "/no-such-page/"},
+  {"wait": "!document.documentElement.className.includes('intro')"},
+  {"expect": "[getComputedStyle($('.bee-fly')).animationName, getComputedStyle($('.bee-fly .bee-wing')).animationName, +getComputedStyle($('.bee-fly')).opacity]", "equals": ["none", "none", 1], "label": "under reduced motion the bee only fades in with its line"}
 ]

@@ -12,6 +12,7 @@ The motion that isn't the home intro. The logo cursor blinks ten times, then sta
 - `motion-photos` hides a photo that hasn't loaded yet, then fades it in.
 - `motion-toc` fades the TOC in over 200ms and out over 150ms.
 - `motion-hover` gives header buttons a hover color and border, for mouse pointers only, and makes the chip's fill and border follow its text color.
+- `motion-bee-sign` puts a 14px bee after `built with hugo` in the footer. It sits still and flaps its wings twice on hover, for mouse pointers with full motion only. The 404 bee is in `not-found.md`.
 
 ## How to get to it (user POV)
 
@@ -31,7 +32,7 @@ node $K/scripts/drive.mjs --run RUN_ID --name motion $K/journeys/motion.json
 node $K/scripts/drive.mjs --run RUN_ID --name motion-dark --dark $K/journeys/motion.json
 ```
 
-- **`motion.json`** checks the cursor's iteration count, the title names, what sits under the middle of a summary and of a tag link, and the hover rule. It toggles the theme and waits for the `theme-reveal` animation on `::view-transition-new(root)`, then checks that the other theme is applied and saved and which way the hidden icon turned. It opens the newest Post from the list three times and reads each `pagereveal` event, requiring at least one view transition with a group for that title. Then it checks the progress bar at the top, halfway and at the end, photos fading in, the TOC fade, that About has no bar, and the chip transition.
+- **`motion.json`** checks the cursor's iteration count, the title names, the footer bee's hover rule and size, what sits under the middle of a summary and of a tag link, and the hover rule. It toggles the theme and waits for the `theme-reveal` animation on `::view-transition-new(root)`, then checks that the other theme is applied and saved and which way the hidden icon turned. It opens the newest Post from the list three times and reads each `pagereveal` event, requiring at least one view transition with a group for that title. Then it checks the progress bar at the top, halfway and at the end, photos fading in, the TOC fade, that About has no bar, and the chip transition.
 - **`home-reduced.json`** checks the 200ms cross-fade under reduced motion.
 - **Proof.** Keep the `theme-reveal-mid` screenshot (the circle half grown) and `progress-half`.
 
@@ -43,3 +44,5 @@ node $K/scripts/drive.mjs --run RUN_ID --name motion-dark --dark $K/journeys/mot
 - A `view-transition-name` must be unique on a page, or the browser skips the whole transition. Titles use `post-` plus the anchorized permalink, and a list never shows a Post twice.
 - A browser without `::details-content` opens the TOC instantly, and the journey skips those checks there.
 - `chrome.json` asserts a light default, so it fails under `--dark` by design.
+- The prod build's `--minify` drops the space after `)` in `var(--dur-flap) ease-in-out`. The browser still parses it, so the footer bee check puts the space back before comparing.
+- `elementFromPoint` returns `null` below the fold. On a phone the Top tracks push the first Post row down, so the journey scrolls it into view first.

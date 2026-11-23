@@ -2,5 +2,6 @@
   {"goto": "/no-such-page/"},
   {"expect": "$$('main .cmd').slice(0, 2).map(p => p.textContent.replace(/\\s+/g, ' ').trim())", "equals": ["$ cd /missing-page", "bash: cd: /missing-page: No such file or directory"], "label": "without JavaScript the lines show /missing-page"},
   {"expect": "!!$({role: 'link', name: 'cd ~'})", "label": "the link home still works"},
+  {"expect": "[!!$('.bee-fly'), !!$('footer .bee-sign')]", "equals": [true, true], "label": "both bees are drawn without JavaScript"},
   {"shot": "not-found-nojs"}
 ]
