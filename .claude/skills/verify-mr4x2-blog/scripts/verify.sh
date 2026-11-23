@@ -3,7 +3,6 @@ set -euo pipefail
 
 REPO="$(cd "$(dirname "${BASH_SOURCE[0]}")/../../../.." && pwd)"
 RUNS="$REPO/.verify/runs"
-PROD_IMAGE="mr4x2/hugo-blog:latest"
 SITE_TITLE="mr4x2 blog"
 
 usage() {
@@ -51,18 +50,21 @@ cmd_launch() {
       printf 'MODE=local\nPORT=%s\nURL=%s\nPID=%s\n' "$port" "$url" "$(cat "$RUN_DIR/pid")" >"$RUN_DIR/instance.env"
       ;;
     prod)
-      docker image inspect "$PROD_IMAGE" >/dev/null || { echo "missing $PROD_IMAGE (docker pull it)" >&2; exit 1; }
-      docker run -d --name "verify-mr4x2-$run" --user "$(id -u):$(id -g)" -e HUGO_CACHEDIR=/tmp/hugo_cache \
-        -p "127.0.0.1:$port:1313" -v "$REPO:/src" -w /src "$PROD_IMAGE" \
-        server -D --bind 0.0.0.0 --port 1313 --baseURL "$url" --appendPort=false --disableFastRender --noHTTPCache >/dev/null
-      printf 'MODE=prod\nPORT=%s\nURL=%s\nCONTAINER=%s\n' "$port" "$url" "verify-mr4x2-$run" >"$RUN_DIR/instance.env"
+      local image="mr4x2-blog-verify:$run"
+      if ! docker build --build-arg "BASE_URL=$url" -t "$image" "$REPO" >"$RUN_DIR/build.log" 2>&1; then
+        echo "image build failed; log: $RUN_DIR/build.log" >&2
+        tail -20 "$RUN_DIR/build.log" >&2
+        exit 1
+      fi
+      docker run -d --name "verify-mr4x2-$run" -p "127.0.0.1:$port:80" "$image" >/dev/null
+      printf 'MODE=prod\nPORT=%s\nURL=%s\nCONTAINER=%s\nIMAGE=%s\n' "$port" "$url" "verify-mr4x2-$run" "$image" >"$RUN_DIR/instance.env"
       ;;
     *) usage ;;
   esac
   load "$run"
   for _ in $(seq 1 60); do
     if [ "$MODE" = prod ]; then docker logs "$CONTAINER" >"$RUN_DIR/server.log" 2>&1 || true; fi
-    if grep -q "Web Server is available at" "$RUN_DIR/server.log" 2>/dev/null &&
+    if { [ "$MODE" = prod ] || grep -q "Web Server is available at" "$RUN_DIR/server.log" 2>/dev/null; } &&
        curl -sf -o /dev/null "$URL"; then
       echo "RUN_ID=$run"
       echo "URL=$URL"
@@ -81,7 +83,7 @@ cmd_launch() {
 
 cmd_doctor() {
   load "$1"
-  local ok=1 home version
+  local ok=1 home
   if instance_up; then echo "ok   instance up ($MODE, port $PORT)"; else echo "FAIL instance not running"; ok=0; fi
   if [ "$MODE" = prod ]; then docker logs "$CONTAINER" >"$RUN_DIR/server.log" 2>&1 || true; fi
   if home="$(curl -sf "$URL")"; then
@@ -90,8 +92,11 @@ cmd_doctor() {
   else
     echo "FAIL GET / failed"; ok=0
   fi
-  if [ "$MODE" = local ]; then version="$(cd "$REPO" && hugo version | awk '{print $2}')"; else version="$(docker exec "$CONTAINER" hugo version | awk '{print $2}')"; fi
-  echo "info hugo $version"
+  if [ "$MODE" = local ]; then
+    echo "info hugo $(cd "$REPO" && hugo version | awk '{print $2}')"
+  else
+    echo "info hugo $(sed -n 's/^FROM hugomods\/hugo:exts-\([0-9.]*\).*/\1/p' "$REPO/Dockerfile" | head -1) (static build, served by nginx)"
+  fi
   echo "info branch $(git -C "$REPO" branch --show-current) @ $(git -C "$REPO" rev-parse --short HEAD)$(git -C "$REPO" diff --quiet && echo '' || echo ' (+ uncommitted changes)')"
   if grep -qiE '^(ERROR|WARN)' "$RUN_DIR/server.log"; then echo "warn server log has ERROR/WARN lines:"; grep -iE '^(ERROR|WARN)' "$RUN_DIR/server.log" | tail -5 | sed 's/^/     /'; fi
   [ "$ok" = 1 ] && echo "doctor: healthy" || { echo "doctor: NOT healthy"; exit 1; }
@@ -106,6 +111,7 @@ cmd_stop() {
     prod)
       docker logs "$CONTAINER" >"$RUN_DIR/server.log" 2>&1 || true
       docker rm -f "$CONTAINER" >/dev/null 2>&1 || true
+      if [ -n "${IMAGE:-}" ]; then docker rmi "$IMAGE" >/dev/null 2>&1 || true; fi
       ;;
   esac
   rm -rf "$RUN_DIR/chrome-profile"

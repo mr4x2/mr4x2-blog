@@ -27,7 +27,15 @@ Personal Hugo blog (mr4x2.com): travel and tech posts in English.
 
 ## Deploy
 
-Pushes to `main` trigger `.github/workflows/hugo.yml`. It runs a `hugo` build check, then pushes a Docker image (`hugomods/hugo:exts` plus the repo source) to Docker Hub as `:latest`. On the server, `docker-compose.yaml` runs `hugo server -D` from that image behind Traefik, so the live site is built when the container starts and drafts are published. Watchtower, in the same compose file, checks for a new `:latest` every 5 minutes and recreates the blog container, so a merge to `main` goes live on its own. PRs run the build check and the Docker build but push nothing. Only `main` pushes, tagging each image `:latest` and `:<commit sha>`. Changes to `docker-compose.yaml` itself only apply after `git pull` and `docker compose up -d` in the server's checkout.
+Pushes to `main` trigger `.github/workflows/hugo.yml`. It runs a `hugo` build check on Hugo 0.154.5, then builds the Docker image and pushes it to Docker Hub as `:latest` and `:<commit sha>`. PRs run the same build check and image build but push nothing.
+
+The `Dockerfile` has two stages. The build stage runs `hugo --gc --minify` on `hugomods/hugo:exts-0.154.5`, then `npx -y pagefind@1.5.0 --site public` to write the search index to `public/pagefind/`. The serve stage is `nginx:alpine` with `nginx.conf`, and it holds only `public/`. Keep Hugo in the `Dockerfile` and in the CI matrix on the same version. Keep Pagefind on 1.5.0, because 1.6.0 dies with `Illegal instruction` on the server's CPU (Xeon E5-2696 v2, no AVX2).
+
+The site is static, so drafts never go live. The Hugo `baseURL` comes from `hugo.toml`. The `Dockerfile` takes a `BASE_URL` build arg that overrides it and defaults to `https://mr4x2.com/`, so CI and the live site build with the default. The verify skill's `prod` mode sets it to a local preview URL.
+
+On the server, `docker-compose.yaml` runs the image behind Traefik on port 80. Watchtower, in the same compose file, checks for a new `:latest` every 5 minutes and recreates the blog container with the old container's command and labels. It swaps only the image. A change to `docker-compose.yaml` applies only after `git pull && docker compose up -d` in the server's checkout.
+
+The first rollout of the nginx image needs one extra step. Run `docker compose stop watchtower` before you merge, so Watchtower cannot start nginx with the old `server -D` command and the old port 1313 label. After CI pushes the new `:latest`, run `git pull && docker compose pull && docker compose up -d`, check the site, then confirm that Watchtower runs again.
 
 ## Reading page
 

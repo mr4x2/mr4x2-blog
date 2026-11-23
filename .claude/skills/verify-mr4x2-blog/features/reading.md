@@ -50,7 +50,7 @@ git checkout -- data/reading.json
 
 - Check sideways scroll against `screen.width`, never `innerWidth`. In phone emulation, Chrome widens the layout viewport to fit content that overflows, so `scrollWidth <= innerWidth` holds even on a broken page.
 - Browsers wrap long text at hyphens, so a hyphenated URL never proves the long-title fix. The fixture's long title has no hyphens on purpose.
-- With live reload, editing `data/reading.json` or the template re-renders the page, but an open journey keeps the old DOM. Run a new `goto` afterwards, and give the server a few seconds.
+- In `local` mode, live reload re-renders the page after you edit `data/reading.json` or the template, but an open journey keeps the old DOM. Run a new `goto` afterwards, and give the server a few seconds. `prod` mode is a static snapshot, so stop and relaunch it after every edit.
 - A `goto` that changes only the hash (`/reading/` to `/reading/#tag=x`) doesn't reload the page, so the search box keeps its query, and search and tag combine (for example `0 of 5`). To prove a shared link, start a fresh journey or `goto` another page first.
 - `#tag=` keys are lowercase, because the sync lowercases Bookmark tags. `#tag=Ceph` matches no button and falls back to All.
 - The page must not appear in "All Posts" (`home.md`, `home-no-reading`) or add Bookmark tags to Tags (`tags.md`). Check both after any change here.

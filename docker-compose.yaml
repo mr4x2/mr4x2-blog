@@ -4,16 +4,13 @@ networks:
 services:
   hugo-blog:
     image: mr4x2/hugo-blog:latest
-    command: server -D --appendPort=false --baseURL=${BASE_URL}
-    volumes:
-      - ~/hugo_cache:/tmp/hugo_cache
     restart: unless-stopped
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.hugo-blog.entrypoints=websecure"
       - "traefik.http.routers.hugo-blog.rule=Host(`mr4x2.com`)"
       - "traefik.http.routers.hugo-blog.service=hugo-blog"
-      - "traefik.http.services.hugo-blog.loadbalancer.server.port=1313"
+      - "traefik.http.services.hugo-blog.loadbalancer.server.port=80"
       - "traefik.docker.network=traefik_cloudflare"
       - "traefik.http.routers.hugo-blog.tls=true"
       - "traefik.http.routers.hugo-blog.tls.certresolver=production"

@@ -18,13 +18,14 @@ In the commands below, `V=.claude/skills/verify-mr4x2-blog/scripts`.
 
 ```bash
 $V/verify.sh launch local   # the repo's own `hugo server -D` (this machine: Hugo 0.145)
-$V/verify.sh launch prod    # the production image mr4x2/hugo-blog:latest (Hugo 0.154.5) serving this working tree
+$V/verify.sh launch prod    # the repo's own static image (Hugo 0.154.5, Pagefind, nginx), built from this working tree
 ```
 
-- Each launch takes a free port on 127.0.0.1, serves drafts (`-D`, like production), and prints `RUN_ID=…`, `URL=…`, `MODE=…` and `EVIDENCE=…`. Copy the RUN_ID, since every later command needs it.
-- **Ready** means the log contains `Web Server is available at` *and* `GET /` returns 200. `launch` waits for both, up to 60 s, or prints the log tail and cleans up after itself.
-- Use `prod` before claiming a template works on the live site. The live server runs Hugo 0.154.5 and CI builds with the `latest` Hugo, while this machine's own Hugo is 0.145, and template behavior differs between versions.
-- Hugo live-reloads on file changes, so you can edit and re-drive without relaunching. To be sure what's being served, relaunch after `npm run build`.
+- Each launch takes a free port on 127.0.0.1 and prints `RUN_ID=…`, `URL=…`, `MODE=…` and `EVIDENCE=…`. Copy the RUN_ID, since every later command needs it.
+- `local` serves drafts (`-D`) and live-reloads. `prod` builds the repo's `Dockerfile` into the image `mr4x2-blog-verify:RUN_ID`, with `BASE_URL` set to the run's URL so links stay on the preview. It runs that image on nginx. The build log is `$RUN_DIR/build.log`.
+- **Ready** for `local` means the log contains `Web Server is available at` *and* `GET /` returns 200. **Ready** for `prod` means `GET /` returns 200. `launch` waits up to 60 s, or prints the log tail and cleans up after itself.
+- Use `prod` before claiming a change works on the live site. It is what production serves: Hugo 0.154.5, the Pagefind index, `nginx.conf`, and no drafts. This machine's own Hugo is 0.145, and template behavior differs between versions.
+- `prod` is a static snapshot of the working tree. It does not live-reload, so relaunch after every change, including `npm run build`. `local` live-reloads, so you can edit and re-drive without relaunching.
 - **Isolation:** two runs can be up at once, because each has its own port and run directory. Never drive the production container (`mr4x2-blog-hugo-blog-1`) or https://mr4x2.com for UI journeys. The live site is only for the deploy feature's read-only checks.
 
 ## Doctor
@@ -33,7 +34,7 @@ $V/verify.sh launch prod    # the production image mr4x2/hugo-blog:latest (Hugo 
 $V/verify.sh doctor RUN_ID
 ```
 
-This is read-only. It checks that the process or container belongs to this run, that `GET /` returns 200, and that the home page `<title>` is `mr4x2 blog`. It also prints the Hugo version, the git branch and commit, whether there are uncommitted changes, and any `ERROR`/`WARN` lines in the server log. Run it first, and again whenever a result looks wrong. If it says `NOT healthy`, stop the run and relaunch. Don't drive a broken instance.
+This is read-only. It checks that the process or container belongs to this run, that `GET /` returns 200, and that the home page `<title>` is `mr4x2 blog`. It also prints the Hugo version (for `prod`, the version in the `Dockerfile`, since the nginx image has no Hugo), the git branch and commit, whether there are uncommitted changes, and any `ERROR`/`WARN` lines in the server log. Run it first, and again whenever a result looks wrong. If it says `NOT healthy`, stop the run and relaunch. Don't drive a broken instance.
 
 ## Drive
 
@@ -75,11 +76,11 @@ node $V/drive.mjs --run RUN_ID --name JOURNEY [--no-js] [--width 390] steps.json
 ## Cleanup
 
 ```bash
-$V/verify.sh stop RUN_ID    # kills only this run's PID or container, deletes its Chromium profile, keeps the evidence
+$V/verify.sh stop RUN_ID    # kills only this run's PID, or removes its container and image, deletes its Chromium profile, keeps the evidence
 $V/verify.sh list           # shows any runs still up
 ```
 
-- Never kill by process name. A `hugo server` and a container named `mr4x2-blog-*` are production, and stay untouched.
+- Never kill by process name, and never stop a container by a name pattern. The containers named `mr4x2-blog-*` are production, and stay untouched. Another `hugo server` on this machine may belong to someone else's run.
 - Clean up after every failed attempt too. Evidence stays in `.verify/runs/RUN_ID/` until you delete it on purpose.
 - Restore anything a journey changed in the working tree, such as a fixture `data/reading.json` or a temporary content file, with `git checkout -- <path>` or `git stash`, before you report.
 
