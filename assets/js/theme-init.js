@@ -8,6 +8,11 @@
     saved === "dark" ||
     (saved !== "light" && matchMedia("(prefers-color-scheme: dark)").matches);
   root.dataset.theme = dark ? "dark" : "light";
+  try {
+    if (localStorage.getItem("mk-garden") === "on") {
+      root.setAttribute("data-garden", "");
+    }
+  } catch (e) {}
   document.querySelector('meta[name="color-scheme"]').content =
     root.dataset.theme;
   try {

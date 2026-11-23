@@ -89,6 +89,15 @@
   --backdrop: rgba(20, 20, 18, 0.28);
   --shadow-pop: 0 20px 60px rgba(0, 0, 0, 0.18);
   color-scheme: light;
+  /* Garden mode is the one place for decorative color. */
+  --garden-bee: #f4b400;
+  /* Black in both themes: light stripes on the dark page wash the bee out. */
+  --garden-stripe: #1b1b1a;
+  --garden-wing: #d8ecf6;
+  --garden-leaf: #4f9a5e;
+  --garden-petal-a: #f28cb1;
+  --garden-petal-b: #a78bfa;
+  --garden-petal-c: #fb923c;
 
   --fs-2xs: 0.6875rem;
   --fs-xs: 0.75rem;
@@ -112,13 +121,16 @@
   --dur-page: 250ms;
   --dur-flight: 480ms;
   --dur-flap: 120ms;
+  --dur-buzz: 80ms;
   --stagger: 60ms;
   --ease-strong: cubic-bezier(0.23, 1, 0.32, 1);
+  --ease-in-out: cubic-bezier(0.77, 0, 0.175, 1);
 
   --wrap: 47.5rem;
   --gutter: 1.5rem;
   --header-h: 3.75rem;
   --radius-pill: 62.5rem;
+  --garden-h: 4rem;
 }
 
 :root[data-theme="dark"] {
@@ -133,6 +145,12 @@
   --backdrop: rgba(0, 0, 0, 0.55);
   --shadow-pop: 0 20px 60px rgba(0, 0, 0, 0.5);
   color-scheme: dark;
+  --garden-bee: #ffc83d;
+  --garden-wing: rgba(216, 236, 246, 0.35);
+  --garden-leaf: #5fbf74;
+  --garden-petal-a: #f9a8c9;
+  --garden-petal-b: #c4b5fd;
+  --garden-petal-c: #fdba74;
 }
 
 /* Against --bg: muted text 7:1, faint text and links 4.5:1, lines 3:1. */
@@ -708,8 +726,40 @@
   .bee-sign {
     width: 0.875rem;
     height: 0.875rem;
-    margin-left: 0.25rem;
-    vertical-align: -0.1875rem;
+  }
+  /* The padding gives the 14px bee a 24px target without moving the footer line. */
+  .bee-btn {
+    display: inline-grid;
+    place-items: center;
+    margin: -0.3125rem 0 -0.3125rem 0.125rem;
+    padding: 0.3125rem;
+    border: 0;
+    border-radius: var(--radius-pill);
+    background: none;
+    color: inherit;
+    vertical-align: middle;
+    cursor: pointer;
+    transition:
+      transform var(--dur-press) var(--ease-strong),
+      color var(--dur-hover) ease;
+  }
+  .bee-btn:active {
+    transform: scale(0.97);
+  }
+  @media (hover: hover) and (pointer: fine) {
+    .bee-btn:hover {
+      color: var(--ink);
+    }
+  }
+  :root[data-garden] .bee-body {
+    fill: var(--garden-bee);
+    stroke: var(--garden-stripe);
+  }
+  :root[data-garden] .bee-stripes {
+    stroke: var(--garden-stripe);
+  }
+  :root[data-garden] .bee-wing {
+    fill: var(--garden-wing);
   }
   .bee-wing {
     transform-box: fill-box;
@@ -752,8 +802,125 @@
     }
   }
   @media (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference) {
-    .bee-sign:hover .bee-wing {
+    .bee-btn:hover .bee-wing {
       animation: bee-flap var(--dur-flap) ease-in-out 2;
+    }
+  }
+
+  .garden-defs {
+    position: absolute;
+  }
+  .garden-bed {
+    position: fixed;
+    inset-inline: 0;
+    bottom: 0;
+    z-index: 9;
+    height: var(--garden-h);
+    background: var(--bg);
+    border-top: 1px dashed var(--line);
+    visibility: hidden;
+    transform: translateY(100%);
+    transition:
+      transform var(--dur-reveal) var(--ease-strong),
+      visibility 0s var(--dur-reveal);
+  }
+  :root[data-garden] .garden-bed {
+    visibility: visible;
+    transform: none;
+    transition: transform var(--dur-reveal) var(--ease-strong);
+  }
+  :root[data-garden] body {
+    padding-bottom: var(--garden-h);
+  }
+  .flower {
+    position: absolute;
+    bottom: 0;
+    left: var(--x);
+    width: calc(var(--h) * 24 / 44);
+    height: var(--h);
+    transform: translateX(-50%);
+    fill: none;
+    stroke-width: 1.5;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+  .flower-a {
+    --petal: var(--garden-petal-a);
+  }
+  .flower-b {
+    --petal: var(--garden-petal-b);
+  }
+  .flower-c {
+    --petal: var(--garden-petal-c);
+  }
+  .flower-stem {
+    stroke: var(--garden-leaf);
+  }
+  .flower-petal {
+    fill: var(--petal);
+    stroke: none;
+  }
+  .flower-center {
+    fill: var(--garden-bee);
+    stroke: none;
+  }
+  .garden-air {
+    position: fixed;
+    inset: 0;
+    z-index: 40;
+    overflow: hidden;
+    pointer-events: none;
+    opacity: 0;
+    visibility: hidden;
+    transition:
+      opacity var(--dur-icon) ease,
+      visibility 0s var(--dur-icon);
+  }
+  :root[data-garden] .garden-air {
+    opacity: 1;
+    visibility: visible;
+    transition: opacity var(--dur-icon) ease;
+  }
+  /* The negative margin centers the bee on the point its transform moves it to. */
+  .garden-bee {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 1.25rem;
+    height: 1.25rem;
+    margin: -0.625rem 0 0 -0.625rem;
+  }
+  .bee-garden {
+    width: 100%;
+    height: 100%;
+    color: var(--ink);
+    transition: transform var(--dur-hover) var(--ease-strong);
+  }
+  .garden-bee.is-right .bee-garden {
+    transform: scaleX(-1);
+  }
+  .garden-follower .bee-garden {
+    transition: none;
+  }
+  .garden-bee.is-flying .bee-wing {
+    animation: bee-flap var(--dur-buzz) ease-in-out infinite;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .garden-bed {
+      transform: none;
+      opacity: 0;
+      transition:
+        opacity var(--dur-icon) ease,
+        visibility 0s var(--dur-icon);
+    }
+    :root[data-garden] .garden-bed {
+      opacity: 1;
+      transition: opacity var(--dur-icon) ease;
+    }
+  }
+  @media print {
+    .garden {
+      display: none;
     }
   }
 
