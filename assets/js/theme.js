@@ -53,30 +53,32 @@ export function initTheme() {
     try {
       localStorage.setItem(KEY, next);
     } catch {}
-    if (
-      !document.startViewTransition ||
-      matchMedia("(prefers-reduced-motion: reduce)").matches
-    ) {
+    if (!document.startViewTransition) {
       apply(next, toggle);
       return;
     }
-    // The new theme grows as a circle from the toggle until it covers the farthest corner.
-    const box = toggle.getBoundingClientRect();
-    const x = box.left + box.width / 2;
-    const y = box.top + box.height / 2;
-    const r = Math.hypot(
-      Math.max(x, innerWidth - x),
-      Math.max(y, innerHeight - y),
-    );
-    root.style.setProperty("--reveal-x", `${x}px`);
-    root.style.setProperty("--reveal-y", `${y}px`);
-    root.style.setProperty("--reveal-r", `${r}px`);
-    root.classList.add("theme-reveal");
+    if (matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      root.classList.add("theme-fade");
+    } else {
+      // The new theme grows as a circle from the toggle until it covers the farthest corner.
+      const box = toggle.getBoundingClientRect();
+      const x = box.left + box.width / 2;
+      const y = box.top + box.height / 2;
+      const r = Math.hypot(
+        Math.max(x, innerWidth - x),
+        Math.max(y, innerHeight - y),
+      );
+      root.style.setProperty("--reveal-x", `${x}px`);
+      root.style.setProperty("--reveal-y", `${y}px`);
+      root.style.setProperty("--reveal-r", `${r}px`);
+      root.classList.add("theme-reveal");
+    }
     const reveal = document.startViewTransition(() => apply(next, toggle));
     latestReveal = reveal;
     // A second click skips the first reveal, whose cleanup must not cut the second one short.
     reveal.finished.finally(() => {
-      if (latestReveal === reveal) root.classList.remove("theme-reveal");
+      if (latestReveal === reveal)
+        root.classList.remove("theme-reveal", "theme-fade");
     });
   });
 

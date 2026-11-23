@@ -72,7 +72,7 @@ The look is style B, a clean blog with a terminal flavor. Full spec: `docs/super
 9. **Motion changes only `transform`, `opacity` and color.** Never animate `height`, `margin` or position, and never use `blur` to bridge two states. View transitions are the one exception: the theme toggle grows the new theme as a `clip-path` circle, and the browser morphs a Post title between a list and the Post.
 10. **One focus ring**, declared once in `assets/css/input.css`: `:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }`.
 
-Dark mode is on purpose. Under `prefers-reduced-motion: reduce`, movement stops but opacity fades of 200ms stay.
+Dark mode is on purpose. Under `prefers-reduced-motion: reduce`, movement stops but opacity fades of 200ms stay, and the theme toggle cross-fades instead of growing a circle. Under `prefers-contrast: more`, the grays and the light green darken to pass WCAG contrast; it is still one accent.
 
 ## Avoid slop
 
