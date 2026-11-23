@@ -1,6 +1,9 @@
 const KEY = "mk-theme";
 const root = document.documentElement;
 const system = matchMedia("(prefers-color-scheme: dark)");
+let latestReveal = null;
+// The theme the reader last asked for. A reveal applies it a frame later, so a quick second click reads this, not data-theme.
+let wanted;
 
 function saved() {
   try {
@@ -42,16 +45,44 @@ export function initTheme() {
   const toggle = document.querySelector("[data-theme-toggle]");
   toggle.setAttribute("aria-pressed", String(root.dataset.theme === "dark"));
   syncMeta();
+  wanted = root.dataset.theme;
 
   toggle.addEventListener("click", () => {
-    const next = root.dataset.theme === "dark" ? "light" : "dark";
+    const next = wanted === "dark" ? "light" : "dark";
+    wanted = next;
     try {
       localStorage.setItem(KEY, next);
     } catch {}
-    apply(next, toggle);
+    if (
+      !document.startViewTransition ||
+      matchMedia("(prefers-reduced-motion: reduce)").matches
+    ) {
+      apply(next, toggle);
+      return;
+    }
+    // The new theme grows as a circle from the toggle until it covers the farthest corner.
+    const box = toggle.getBoundingClientRect();
+    const x = box.left + box.width / 2;
+    const y = box.top + box.height / 2;
+    const r = Math.hypot(
+      Math.max(x, innerWidth - x),
+      Math.max(y, innerHeight - y),
+    );
+    root.style.setProperty("--reveal-x", `${x}px`);
+    root.style.setProperty("--reveal-y", `${y}px`);
+    root.style.setProperty("--reveal-r", `${r}px`);
+    root.classList.add("theme-reveal");
+    const reveal = document.startViewTransition(() => apply(next, toggle));
+    latestReveal = reveal;
+    // A second click skips the first reveal, whose cleanup must not cut the second one short.
+    reveal.finished.finally(() => {
+      if (latestReveal === reveal) root.classList.remove("theme-reveal");
+    });
   });
 
   system.addEventListener("change", (e) => {
-    if (!saved()) apply(e.matches ? "dark" : "light", toggle);
+    if (saved()) return;
+    wanted = e.matches ? "dark" : "light";
+    apply(wanted, toggle);
   });
 }

@@ -5,6 +5,7 @@
   {"media": {"prefers-color-scheme": "light"}},
   {"wait": "document.documentElement.dataset.theme === 'light'", "label": "follows a live system change"},
   {"click": {"role": "button", "name": "Toggle dark mode"}, "label": "reader picks dark"},
+  {"wait": "document.documentElement.dataset.theme === 'dark' && !document.documentElement.classList.contains('theme-reveal')", "label": "the theme reveal finishes"},
   {"expect": "[document.documentElement.dataset.theme, localStorage.getItem('mk-theme')]", "equals": ["dark", "dark"]},
   {"media": {"prefers-color-scheme": "dark"}},
   {"media": {"prefers-color-scheme": "light"}},

@@ -5,6 +5,9 @@
   {"expect": "[+getComputedStyle($('.who-out')).opacity, +getComputedStyle($('.post')).opacity]", "equals": [1, 1], "label": "content is shown"},
   {"expect": "getComputedStyle($('.who-out')).transitionDuration", "equals": "0.2s", "label": "fade is 200ms"},
   {"expect": "getComputedStyle($('.logo > span:last-child')).animationName", "equals": "none", "label": "cursor stays solid"},
+  {"click": {"role": "button", "name": "Toggle dark mode"}, "label": "toggle the theme"},
+  {"expect": "[document.documentElement.dataset.theme, document.documentElement.classList.contains('theme-reveal')]", "equals": ["dark", false], "label": "the theme swaps at once, with no circle reveal"},
+  {"click": {"role": "button", "name": "Toggle dark mode"}, "label": "toggle back"},
   {"shot": "reduced"},
   {"text": "reduced"}
 ]

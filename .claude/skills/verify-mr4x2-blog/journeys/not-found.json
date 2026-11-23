@@ -1,7 +1,9 @@
 [
   {"goto": "/no-such-page/"},
   {"expect": "fetch('/no-such-page/').then(r => r.status)", "equals": 404, "label": "the server answers 404"},
-  {"expect": "$('main .cmd').textContent.replace(/\\s+/g, ' ').trim()", "equals": "bash: cd: /no-such-page/: No such file or directory", "label": "the path comes from the address bar"},
+  {"expect": "new Promise(done => { const root = document.documentElement, log = []; const t = setInterval(() => { log.push({ cls: root.className, typed: $('[data-typed]').textContent, out: +getComputedStyle($$('main .cmd')[1]).opacity }); if (log.length >= 24) { clearInterval(t); const typing = log.filter(s => s.cls === 'intro-typing'); const lens = typing.map(s => s.typed.length); done({ typedWhileTyping: typing.length > 0, grows: lens.every((n, i) => i === 0 || n >= lens[i - 1]), errorHiddenWhileTyping: typing.every(s => s.out < 0.05), end: log[log.length - 1] }); } }, 50); })", "equals": {"typedWhileTyping": true, "grows": true, "errorHiddenWhileTyping": true, "end": {"cls": "", "typed": "cd /no-such-page/", "out": 1}}, "label": "the cd command types out, then the error answers it"},
+  {"expect": "$$('main .cmd').map(p => p.textContent.replace(/\\s+/g, ' ').trim())", "equals": ["$ cd /no-such-page/", "bash: cd: /no-such-page/: No such file or directory", "cd ~"], "label": "the path comes from the address bar"},
+  {"expect": "sessionStorage.getItem('mk-intro-seen')", "equals": null, "label": "the 404 intro does not use up the home intro"},
   {"expect": "$('h1').textContent.trim()", "equals": "Page not found", "label": "the page has a heading"},
   {"expect": "$$('header nav a').length", "equals": 4, "label": "the header is there"},
   {"shot": "not-found"},

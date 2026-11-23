@@ -12,7 +12,10 @@
     <time class="post-date" datetime="{{ .post.Date.Format "2006-01-02" }}"
       >{{ .post.Date.Format "2006-01-02" }}</time
     >
-    <h2 class="post-title">
+    <h2
+      class="post-title"
+      style="view-transition-name: post-{{ anchorize .post.RelPermalink }}"
+    >
       <a href="{{ .post.RelPermalink }}">{{ .post.Title }}</a>
     </h2>
     <p class="post-sum">{{ .post.Summary | plainify }}</p>
