@@ -89,10 +89,8 @@
   --backdrop: rgba(20, 20, 18, 0.28);
   --shadow-pop: 0 20px 60px rgba(0, 0, 0, 0.18);
   color-scheme: light;
-  /* Garden mode is the one place for decorative color. */
+  /* Garden mode is the one place for decorative color, and it is always on the light page. */
   --garden-bee: #f4b400;
-  /* Black in both themes: light stripes on the dark page wash the bee out. */
-  --garden-stripe: #1b1b1a;
   --garden-wing: #d8ecf6;
   --garden-leaf: #4f9a5e;
   --garden-petal-a: #f28cb1;
@@ -145,12 +143,6 @@
   --backdrop: rgba(0, 0, 0, 0.55);
   --shadow-pop: 0 20px 60px rgba(0, 0, 0, 0.5);
   color-scheme: dark;
-  --garden-bee: #ffc83d;
-  --garden-wing: rgba(216, 236, 246, 0.35);
-  --garden-leaf: #5fbf74;
-  --garden-petal-a: #f9a8c9;
-  --garden-petal-b: #c4b5fd;
-  --garden-petal-c: #fdba74;
 }
 
 /* Against --bg: muted text 7:1, faint text and links 4.5:1, lines 3:1. */
@@ -355,18 +347,24 @@
     width: 2rem;
     padding: 0;
   }
+  /* The next icon in the cycle waits turned back and the one that just left turns on, so every click turns the button the same way. */
   .tg-icon {
     position: absolute;
+    opacity: 0;
+    transform: scale(0.85) rotate(-25deg);
     transition:
       opacity var(--dur-icon) var(--ease-strong),
       transform var(--dur-icon) var(--ease-strong);
   }
-  [data-theme="light"] .tg-moon,
-  [data-theme="dark"] .tg-sun {
-    opacity: 0;
-    transform: scale(0.85) rotate(-25deg);
+  :root[data-theme="light"]:not([data-garden]) .tg-sun,
+  :root[data-theme="dark"] .tg-moon,
+  :root[data-garden] .tg-flower {
+    opacity: 1;
+    transform: none;
   }
-  [data-theme="dark"] .tg-sun {
+  :root[data-theme="light"]:not([data-garden]) .tg-flower,
+  :root[data-theme="dark"] .tg-sun,
+  :root[data-garden] .tg-moon {
     transform: scale(0.85) rotate(25deg);
   }
   :root:not([data-theme]) .needs-js {
@@ -753,10 +751,6 @@
   }
   :root[data-garden] .bee-body {
     fill: var(--garden-bee);
-    stroke: var(--garden-stripe);
-  }
-  :root[data-garden] .bee-stripes {
-    stroke: var(--garden-stripe);
   }
   :root[data-garden] .bee-wing {
     fill: var(--garden-wing);
@@ -818,16 +812,7 @@
     height: var(--garden-h);
     background: var(--bg);
     border-top: 1px dashed var(--line);
-    visibility: hidden;
-    transform: translateY(100%);
-    transition:
-      transform var(--dur-reveal) var(--ease-strong),
-      visibility 0s var(--dur-reveal);
-  }
-  :root[data-garden] .garden-bed {
-    visibility: visible;
-    transform: none;
-    transition: transform var(--dur-reveal) var(--ease-strong);
+    display: none;
   }
   :root[data-garden] body {
     padding-bottom: var(--garden-h);
@@ -870,16 +855,11 @@
     z-index: 40;
     overflow: hidden;
     pointer-events: none;
-    opacity: 0;
-    visibility: hidden;
-    transition:
-      opacity var(--dur-icon) ease,
-      visibility 0s var(--dur-icon);
+    display: none;
   }
-  :root[data-garden] .garden-air {
-    opacity: 1;
-    visibility: visible;
-    transition: opacity var(--dur-icon) ease;
+  /* The theme reveal brings the garden in, so it needs no entrance of its own. */
+  :root[data-garden] :is(.garden-bed, .garden-air) {
+    display: block;
   }
   /* The negative margin centers the bee on the point its transform moves it to. */
   .garden-bee {
@@ -904,19 +884,6 @@
   }
   .garden-bee.is-flying .bee-wing {
     animation: bee-flap var(--dur-buzz) ease-in-out infinite;
-  }
-  @media (prefers-reduced-motion: reduce) {
-    .garden-bed {
-      transform: none;
-      opacity: 0;
-      transition:
-        opacity var(--dur-icon) ease,
-        visibility 0s var(--dur-icon);
-    }
-    :root[data-garden] .garden-bed {
-      opacity: 1;
-      transition: opacity var(--dur-icon) ease;
-    }
   }
   @media print {
     .garden {

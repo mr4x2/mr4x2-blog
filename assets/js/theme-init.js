@@ -4,15 +4,18 @@
   try {
     saved = localStorage.getItem("mk-theme");
   } catch (e) {}
-  var dark =
-    saved === "dark" ||
-    (saved !== "light" && matchMedia("(prefers-color-scheme: dark)").matches);
-  root.dataset.theme = dark ? "dark" : "light";
+  var garden = false;
   try {
-    if (localStorage.getItem("mk-garden") === "on") {
-      root.setAttribute("data-garden", "");
-    }
+    garden = localStorage.getItem("mk-garden") === "on";
   } catch (e) {}
+  // Garden is the light page with flowers and bees.
+  var dark =
+    !garden &&
+    (saved === "dark" ||
+      (saved !== "light" &&
+        matchMedia("(prefers-color-scheme: dark)").matches));
+  root.dataset.theme = dark ? "dark" : "light";
+  if (garden) root.setAttribute("data-garden", "");
   document.querySelector('meta[name="color-scheme"]').content =
     root.dataset.theme;
   try {

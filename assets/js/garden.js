@@ -1,4 +1,3 @@
-const KEY = "mk-garden";
 const BEE_KEY = "mk-garden-bee";
 // Bee pacing, the garden's version of the typing speed in intro.js.
 const WANDER_PX_PER_S = 120;
@@ -19,29 +18,18 @@ const root = document.documentElement;
 const reduce = matchMedia("(prefers-reduced-motion: reduce)");
 let stopGarden = null;
 
-export function initGarden() {
-  const toggle = document.querySelector("[data-garden-toggle]");
+export function syncGarden(origin) {
   const garden = document.querySelector(".garden");
-  if (!toggle || !garden) return;
+  if (!garden) return;
+  stopGarden?.();
+  stopGarden = root.hasAttribute("data-garden")
+    ? startGarden(garden, origin)
+    : null;
+}
 
-  const sync = (origin) => {
-    const on = root.hasAttribute("data-garden");
-    toggle.setAttribute("aria-pressed", String(on));
-    stopGarden?.();
-    stopGarden = on ? startGarden(garden, origin) : null;
-  };
-  toggle.addEventListener("click", () => {
-    const on = !root.hasAttribute("data-garden");
-    root.toggleAttribute("data-garden", on);
-    try {
-      if (on) localStorage.setItem(KEY, "on");
-      else localStorage.removeItem(KEY);
-    } catch {}
-    const box = toggle.getBoundingClientRect();
-    sync({ x: box.left + box.width / 2, y: box.top + box.height / 2 });
-  });
-  reduce.addEventListener("change", () => sync());
-  sync();
+export function initGarden() {
+  reduce.addEventListener("change", () => syncGarden());
+  syncGarden();
 }
 
 function startGarden(garden, origin) {
@@ -53,7 +41,6 @@ function startGarden(garden, origin) {
   const timers = new Set();
   const listeners = [];
   const wanderers = [];
-  air.replaceChildren();
 
   const rand = (min, max) => min + Math.random() * (max - min);
   const later = (ms, fn) => {
@@ -75,16 +62,10 @@ function startGarden(garden, origin) {
   const place = (bee, p) => {
     bee.style.transform = `translate(${p.x}px, ${p.y}px)`;
   };
-  // A bee lands just above the flower's head, 10 units down its 44-unit drawing. It measures from
-  // where the bed rests, since the bed is still sliding up right after the toggle.
+  // A bee lands just above the flower's head, 10 units down its 44-unit drawing.
   const onFlower = (flower) => {
     const r = flower.getBoundingClientRect();
-    const slide =
-      bed.getBoundingClientRect().top - (innerHeight - bed.offsetHeight);
-    return {
-      x: r.left + r.width / 2,
-      y: r.top - slide + (r.height * 10) / 44 - 6,
-    };
+    return { x: r.left + r.width / 2, y: r.top + (r.height * 10) / 44 - 6 };
   };
   const anyFlower = () => flowers[Math.floor(Math.random() * flowers.length)];
 
@@ -176,8 +157,10 @@ function startGarden(garden, origin) {
     try {
       saved = JSON.parse(sessionStorage.getItem(BEE_KEY));
     } catch {}
-    const p =
-      origin ?? saved ?? onFlower(flowers[Math.floor(flowers.length / 2)]);
+    // A new garden's bee starts beside the button that turned it on, as if the pointer were there.
+    const p = origin
+      ? { x: origin.x + FOLLOW_OFFSET, y: origin.y + FOLLOW_OFFSET }
+      : (saved ?? onFlower(flowers[Math.floor(flowers.length / 2)]));
     p.x = Math.min(Math.max(p.x, EDGE), innerWidth - EDGE);
     p.y = Math.min(Math.max(p.y, EDGE), innerHeight - EDGE);
     const v = { x: 0, y: 0 };
@@ -244,31 +227,26 @@ function startGarden(garden, origin) {
     });
   }
 
-  // Only the bees' own animations: the layer's fade belongs to the CSS and must finish.
-  const beeAnimations = () =>
-    [...air.children].flatMap((bee) => bee.getAnimations({ subtree: true }));
-
   listen(document, "visibilitychange", () => {
     if (document.hidden) {
-      for (const a of beeAnimations()) a.pause();
+      for (const a of air.getAnimations({ subtree: true })) a.pause();
       for (const t of timers) clearTimeout(t);
       timers.clear();
       cancelAnimationFrame(raf);
       raf = 0;
       return;
     }
-    for (const a of beeAnimations()) a.play();
+    for (const a of air.getAnimations({ subtree: true })) a.play();
     if (reduce.matches) return;
     for (const bee of wanderers)
       if (!bee.classList.contains("is-flying")) rest(bee);
     wake();
   });
 
-  // Stopping freezes the bees where they are while the layer fades out; the next start clears them.
   return () => {
     for (const t of timers) clearTimeout(t);
     cancelAnimationFrame(raf);
-    for (const a of beeAnimations()) a.pause();
     for (const off of listeners) off();
+    air.replaceChildren();
   };
 }
