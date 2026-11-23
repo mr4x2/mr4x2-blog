@@ -76,7 +76,7 @@ The look is style B, a clean blog with a terminal flavor. Full spec: `docs/super
 
 1. **Tokens only.** Colors, font sizes, durations and easing curves are tokens in `assets/css/input.css`. Templates and scripts never declare a hex color, a `px` font size, an `ms` duration or a `cubic-bezier`. The one exception is the typing speed, a named constant at the top of the intro script.
 2. **No gradients, no `backdrop-filter`, no glass.** The sticky header is a flat `--bg` fill. The search popup's backdrop is a flat `--backdrop` color.
-3. **No emoji as icons.** Icons are inline SVG with Lucide paths, `stroke-width` 1.5, at 14px, 16px or 20px, one size per context. Emoji may appear only in post content the author wrote.
+3. **No emoji as icons.** Icons are inline SVG with Lucide paths, `stroke-width` 1.5, at 14px, 16px or 20px, one size per context. The bee in `partials/bee.html` is the one drawing of our own, in the same style: 20px on the 404 page, 14px in the footer. Emoji may appear only in post content the author wrote.
 4. **Two weights.** Inter uses 400 for text and 600 for titles. JetBrains Mono uses 400, and 700 only for the logo. Never 500.
 5. **One accent color.** Green marks a terminal element or a link, and nothing else. No second accent, no decorative color.
 6. **No left-border accent blocks.** The `whoami` line sits under its prompt with no border.

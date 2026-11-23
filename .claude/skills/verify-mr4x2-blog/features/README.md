@@ -36,8 +36,8 @@ Each feature file starts with an H1 title and a paragraph describing the behavio
 - [Post page](./post.md) covers the date and reading time, tags, the `$ cat toc` table of contents, centered photos with captions, code colors, older and newer links, giscus in the site theme, and About as a plain page.
 - [Tags](./tags.md) covers `/tags/`, each tag page, the removed `readme` and `info` tags, and that Bookmark tags stay off it.
 - [Search popup](./search.md) covers Ctrl K, `/`, Pagefind results for `Bangkok`, the keys, focus return and the missing-index message.
-- [404 page](./not-found.md) covers the typed `cd` command, the `bash: cd:` line, its path from the address bar, and the no-JavaScript fallback.
-- [Motion](./motion.md) covers the theme reveal, the title morph between pages, the reading bar, photo and TOC fades, the row link, the logo cursor and hover states.
+- [404 page](./not-found.md) covers the typed `cd` command, the `bash: cd:` line, its path from the address bar, the bee that flies in beside `cd ~`, and the no-JavaScript fallback.
+- [Motion](./motion.md) covers the theme reveal, the title morph between pages, the reading bar, photo and TOC fades, the row link, the logo cursor, hover states and the footer bee.
 - [Reading page](./reading.md) covers the `/reading` Bookmark list, the tag filter, search, the no-JS fallback and the empty state. It's **new in #15**.
 - [Raindrop sync](./sync.md) covers the author's sync command: the happy path, a bad token, missing settings, and leaving the file alone when nothing changed.
 - [Deploy chain](./deploy.md) covers the read-only checks that a merge or sync reached the live site.
