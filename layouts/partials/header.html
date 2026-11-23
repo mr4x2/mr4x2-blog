@@ -84,4 +84,7 @@
       </button>
     </div>
   </div>
+  {{ if and .IsPage (not .Layout) }}
+    <div class="read-progress" aria-hidden="true"></div>
+  {{ end }}
 </header>

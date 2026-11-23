@@ -13,7 +13,8 @@
   try {
     if (
       root.hasAttribute("data-intro") &&
-      !sessionStorage.getItem("mk-intro-seen")
+      (root.dataset.intro === "always" ||
+        !sessionStorage.getItem("mk-intro-seen"))
     ) {
       root.classList.add("intro-pending");
     }

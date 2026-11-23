@@ -11,6 +11,7 @@
   {"shot": "light"},
   {"text": "light"},
   {"click": {"role": "button", "name": "Toggle dark mode"}, "label": "toggle to dark"},
+  {"wait": "document.documentElement.dataset.theme === 'dark' && !document.documentElement.classList.contains('theme-reveal')", "label": "the theme reveal finishes"},
   {"expect": "[document.documentElement.dataset.theme, localStorage.getItem('mk-theme'), $({role:'button', name:'Toggle dark mode'}).getAttribute('aria-pressed')]", "equals": ["dark", "dark", "true"], "label": "dark is saved"},
   {"expect": "getComputedStyle(document.body).backgroundColor", "equals": "rgb(14, 16, 15)", "label": "dark page color"},
   {"expect": "document.querySelector('meta[name=theme-color]').content", "equals": "#0e100f", "label": "theme-color follows"},
@@ -22,6 +23,7 @@
   {"expect": "JSON.parse(document.documentElement.getAttribute('data-first-frame'))", "equals": {"theme": "dark", "bg": "rgb(14, 16, 15)"}, "label": "first frame is dark"},
   {"expect": "!!document.head.querySelector('script:not([src])') && !!(document.head.querySelector('script:not([src])').compareDocumentPosition(document.head.querySelector('link[rel=stylesheet]')) & Node.DOCUMENT_POSITION_FOLLOWING)", "label": "theme script runs before the stylesheet"},
   {"click": {"role": "button", "name": "Toggle dark mode"}, "label": "toggle back to light"},
+  {"wait": "document.documentElement.dataset.theme === 'light' && !document.documentElement.classList.contains('theme-reveal')", "label": "the theme reveal finishes"},
   {"expect": "[document.documentElement.dataset.theme, localStorage.getItem('mk-theme')]", "equals": ["light", "light"], "label": "light is saved"},
   {"shot": "light-again"}
 ]

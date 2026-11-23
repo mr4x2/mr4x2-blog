@@ -6,6 +6,7 @@
   {"scroll": "iframe.giscus-frame"},
   {"shot": "giscus-before", "viewport": true},
   {"click": {"role": "button", "name": "Toggle dark mode"}, "label": "toggle the theme"},
+  {"wait": "document.documentElement.hasAttribute('data-giscus-msg')", "label": "the theme swap reaches giscus"},
   {"expect": "(m => [m[1], m[0].giscus.setConfig.theme === document.documentElement.dataset.theme])(JSON.parse(document.documentElement.getAttribute('data-giscus-msg')))", "equals": ["https://giscus.app", true], "label": "giscus is told the new theme"},
   {"expect": "new Promise(r => setTimeout(r, 1500, 'waited'))", "equals": "waited"},
   {"shot": "giscus-after", "viewport": true}

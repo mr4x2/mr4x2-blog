@@ -2,7 +2,11 @@
 <html
   lang="{{ site.Language.LanguageCode }}"
   dir="{{ or site.Language.LanguageDirection `ltr` }}"
-  {{ if .IsHome }}data-intro{{ end }}
+  {{ if .IsHome }}
+    data-intro
+  {{ else if eq .Kind "404" }}
+    data-intro="always"
+  {{ end }}
 >
   <head>
     {{ partial "head.html" . }}

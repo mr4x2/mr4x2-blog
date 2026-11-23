@@ -18,7 +18,7 @@ Personal Hugo blog (mr4x2.com): travel and tech posts in English.
 - The theme lives in this repo. `layouts/` holds the templates, edited in place. There is no theme directory or submodule.
 - `assets/css/output.css` is the compiled Tailwind file, committed to the repo. It is what `layouts/partials/head/css.html` loads, and both `npm run build` and `npm run watch` write to it.
 - `public/` and `resources/` are generated build output. Here `hugo server` also writes into `public/` and can serve a page that an earlier run left there, so delete `public/` before a verification run.
-- The home page is `layouts/index.html`, which renders `partials/home/whoami.html` and `partials/home/posts.html`. The `whoami` line is `params.whoami` in `hugo.toml`. A "who I am" version is one more block, not a rewrite. On the first visit of a session `whoami` types out, driven by classes on `<html>` that `theme-init.js` sets before first paint.
+- The home page is `layouts/index.html`, which renders `partials/home/whoami.html` and `partials/home/posts.html`. The `whoami` line is `params.whoami` in `hugo.toml`. A "who I am" version is one more block, not a rewrite. On the first visit of a session `whoami` types out, driven by classes on `<html>` that `theme-init.js` sets before first paint. The 404 page types its `cd` command the same way on every visit, marked by `data-intro="always"`.
 - Thumbnails on post rows come from the front-matter `image`. `hugo.toml` mounts `static/trip-in-*` at `assets/photos`, so Hugo can resize them to small WebP files. A mount you define replaces Hugo's default mounts for that component, so the defaults are listed again there.
 - Search is Pagefind, pinned to 1.5.0, because 1.6.0 dies with `Illegal instruction` on the server's CPU (no AVX2). `assets/js/search.js` loads `/pagefind/pagefind.js` with a dynamic `import()` on the first open. Only pages with `data-pagefind-body` are indexed: posts and About.
 - The Search and theme buttons need JavaScript, so `.needs-js` hides them until `theme-init.js` has set `data-theme`.
@@ -69,7 +69,7 @@ The look is style B, a clean blog with a terminal flavor. Full spec: `docs/super
 6. **No left-border accent blocks.** The `whoami` line sits under its prompt with no border.
 7. **No cards around static text.** Post rows are separated by dashed dividers. The search popup is the only raised surface.
 8. **The type scale is closed** (`--fs-*`). A new size is a new token.
-9. **Motion changes only `transform`, `opacity` and color.** Never animate `height`, `margin` or position, and never use `blur` to bridge two states.
+9. **Motion changes only `transform`, `opacity` and color.** Never animate `height`, `margin` or position, and never use `blur` to bridge two states. View transitions are the one exception: the theme toggle grows the new theme as a `clip-path` circle, and the browser morphs a Post title between a list and the Post.
 10. **One focus ring**, declared once in `assets/css/input.css`: `:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }`.
 
 Dark mode is on purpose. Under `prefers-reduced-motion: reduce`, movement stops but opacity fades of 200ms stay.
