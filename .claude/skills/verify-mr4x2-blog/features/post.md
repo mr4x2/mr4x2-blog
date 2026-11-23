@@ -4,7 +4,7 @@ A Post page shows the date and reading time in monospace (`2025-03-29 · 3 min r
 
 ## Sub-features
 
-- `post-header` shows `YYYY-MM-DD · N min read`, the title and the tags, each tag linking to `/tags/<tag>/`.
+- `post-header` shows `YYYY-MM-DD · N min read`, the title and the tags, each tag linking to `/tags/<tag>/`. The title and the body's `h2` are tracked tighter the bigger they are (`-0.02em`, `-0.015em`).
 - `post-toc` shows `$ cat toc`, open by default, with links that jump to the headings. A heading stops below the sticky header.
 - `post-figures` renders `![alt](path#center "Caption")` as a centered figure whose caption is the title text.
 - `post-code` colors code blocks with the Chroma palette of the active theme.
@@ -36,7 +36,7 @@ node $K/scripts/drive.mjs --run RUN_ID --name about $K/journeys/about.json
 node $K/scripts/drive.mjs --run RUN_ID --name post-giscus $K/journeys/post-giscus.json
 ```
 
-- **`post.json`** opens the Thailand Post from the list and checks the date and reading time, title, tags, the open `$ cat toc`, and that the first TOC link lands the heading below the header. It checks the two captions (`Canals in Bangkok`, `Pad Thai`), that a `#center` image is centered, that a photo loads where the reader scrolls, that the page does not scroll sideways (the YouTube iframe is 560 px wide in the Markdown), the JSON-LD and `og:image` image, and the giscus script's theme, mapping and repo. It injects a code block to check both Chroma palettes, then follows `newer`, `older` and `cd ~`. Run it with `--dark` and `--width 390` too.
+- **`post.json`** opens the Thailand Post from the list and checks the date and reading time, title, heading tracking, tags, the open `$ cat toc`, and that the first TOC link lands the heading below the header. It checks the two captions (`Canals in Bangkok`, `Pad Thai`), that a `#center` image is centered, that a photo loads where the reader scrolls, that the page does not scroll sideways (the YouTube iframe is 560 px wide in the Markdown), the JSON-LD and `og:image` image, and the giscus script's theme, mapping and repo. It injects a code block to check both Chroma palettes, then follows `newer`, `older` and `cd ~`. Run it with `--dark` and `--width 390` too.
 - **`about.json`** opens About from the menu, checks that it has no date, TOC, tags or older and newer links, that the text renders, and that giscus keeps the pathname mapping.
 - **`post-giscus.json`** needs the network. It waits for the real giscus iframe, checks that its `theme` query is the site theme, toggles the theme, and checks that the page posted `{giscus: {setConfig: {theme}}}` to `https://giscus.app`. Its two screenshots show the comments before and after. Report it as skipped, with the reason, when giscus.app is unreachable.
 - **Proof.** Keep `post-top`, `post-figure`, `post-code`, `giscus-before` and `giscus-after`.

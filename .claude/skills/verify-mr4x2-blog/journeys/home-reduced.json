@@ -6,8 +6,11 @@
   {"expect": "getComputedStyle($('.who-out')).transitionDuration", "equals": "0.2s", "label": "fade is 200ms"},
   {"expect": "getComputedStyle($('.logo > span:last-child')).animationName", "equals": "none", "label": "cursor stays solid"},
   {"click": {"role": "button", "name": "Toggle dark mode"}, "label": "toggle the theme"},
-  {"expect": "[document.documentElement.dataset.theme, document.documentElement.classList.contains('theme-reveal')]", "equals": ["dark", false], "label": "the theme swaps at once, with no circle reveal"},
+  {"expect": "[document.documentElement.classList.contains('theme-fade'), document.documentElement.classList.contains('theme-reveal')]", "equals": [true, false], "label": "the toggle starts a cross-fade, not the circle reveal"},
+  {"wait": "document.documentElement.getAnimations({subtree: true}).some(a => a.effect.pseudoElement === '::view-transition-new(root)' && a.effect.getComputedTiming().duration === 200 && a.animationName !== 'theme-reveal')", "timeout": 2000, "label": "the new theme fades in over 200ms"},
+  {"wait": "document.documentElement.dataset.theme === 'dark' && !document.documentElement.classList.contains('theme-fade')", "timeout": 3000, "label": "the fade ends on dark and cleans up"},
   {"click": {"role": "button", "name": "Toggle dark mode"}, "label": "toggle back"},
+  {"wait": "document.documentElement.dataset.theme === 'light' && !document.documentElement.classList.contains('theme-fade')", "timeout": 3000},
   {"shot": "reduced"},
   {"text": "reduced"}
 ]

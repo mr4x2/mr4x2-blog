@@ -6,7 +6,7 @@ The motion that isn't the home intro. The logo cursor blinks ten times, then sta
 
 - `motion-cursor` stops the logo cursor after ten blinks.
 - `motion-row-link` makes the summary and thumbnail part of the row's link, with the tag links above it.
-- `motion-theme-reveal` grows the new theme from the toggle with a view transition and a `clip-path` circle, then removes the `theme-reveal` class. Under reduced motion the swap is instant.
+- `motion-theme-reveal` grows the new theme from the toggle with a view transition and a `clip-path` circle, then removes the `theme-reveal` class. Under reduced motion it cross-fades over 200ms with `theme-fade` instead.
 - `motion-title-morph` gives each Post title the same `view-transition-name` in the list and on the Post, so a page change morphs it on its own.
 - `motion-progress` fills the bar under the header on Posts only, from empty at the top to full at the end of the article.
 - `motion-photos` hides a photo that hasn't loaded yet, then fades it in.
@@ -32,7 +32,7 @@ node $K/scripts/drive.mjs --run RUN_ID --name motion-dark --dark $K/journeys/mot
 ```
 
 - **`motion.json`** checks the cursor's iteration count, the title names, what sits under the middle of a summary and of a tag link, and the hover rule. It toggles the theme and waits for the `theme-reveal` animation on `::view-transition-new(root)`, then checks that the other theme is applied and saved and which way the hidden icon turned. It opens the newest Post from the list three times and reads each `pagereveal` event, requiring at least one view transition with a group for that title. Then it checks the progress bar at the top, halfway and at the end, photos fading in, the TOC fade, that About has no bar, and the chip transition.
-- **`home-reduced.json`** checks that the theme swaps at once under reduced motion.
+- **`home-reduced.json`** checks the 200ms cross-fade under reduced motion.
 - **Proof.** Keep the `theme-reveal-mid` screenshot (the circle half grown) and `progress-half`.
 
 ## Gotchas

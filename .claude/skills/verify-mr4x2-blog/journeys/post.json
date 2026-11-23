@@ -5,6 +5,7 @@
   {"wait": "location.pathname === '/a-great-trip-in-thailand/'"},
   {"expect": "$('.article-meta').textContent.replace(/\\s+/g, ' ').trim().replace(/\\d+ min/, 'N min')", "equals": "2025-03-29 · N min read", "label": "date and reading time"},
   {"expect": "$('h1').textContent.trim()", "equals": "A great trip in Thailand", "label": "title"},
+  {"expect": "[$('h1'), $('.prose h2'), $('.prose h3')].map(h => getComputedStyle(h).fontSize + ' ' + getComputedStyle(h).letterSpacing)", "equals": ["28px -0.56px", "22px -0.33px", "19px normal"], "label": "bigger headings are tracked tighter"},
   {"expect": "$$('article .post-tags a').map(a => a.textContent.trim())", "equals": ["#travel", "#thailand", "#fossasia"], "label": "tags"},
   {"expect": "[$('details.toc').open, $('details.toc summary').textContent.replace(/\\s+/g, ' ').trim(), $$('details.toc a').length > 0]", "equals": [true, "$ cat toc", true], "label": "table of contents is open and labelled"},
   {"shot": "post-top", "viewport": true},
