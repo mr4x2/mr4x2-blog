@@ -1,6 +1,6 @@
 ---
 name: verify-mr4x2-blog
-description: Drive the mr4x2.com Hugo blog the way a reader or the author would, and capture proof. Covers the web pages (home, posts, tags, the Reading page and its filter), the Raindrop sync CLI, and the production deploy chain (GitHub Actions → Docker Hub → Watchtower). Use it to verify a template, content, CSS, sync or deploy change before you claim it works.
+description: Drive the mr4x2.com Hugo blog the way a reader or the author would, and capture proof. Covers the web pages (home with its typing intro, posts, About, tags, the Reading page, the search popup and the 404 page, in light and dark mode), the slop check, the Raindrop sync CLI, and the production deploy chain (GitHub Actions → Docker Hub → Watchtower). Use it to verify a template, content, CSS, JavaScript, sync or deploy change before you claim it works.
 ---
 
 # Verify the mr4x2 blog
@@ -26,7 +26,8 @@ $V/verify.sh launch prod    # the repo's own static image (Hugo 0.154.5, Pagefin
 - **Ready** for `local` means the log contains `Web Server is available at` *and* `GET /` returns 200. **Ready** for `prod` means `GET /` returns 200. `launch` waits up to 60 s, or prints the log tail and cleans up after itself.
 - Use `prod` before claiming a change works on the live site. It is what production serves: Hugo 0.154.5, the Pagefind index, `nginx.conf`, and no drafts. This machine's own Hugo is 0.145, and template behavior differs between versions.
 - `prod` is a static snapshot of the working tree. It does not live-reload, so relaunch after every change, including `npm run build`. `local` live-reloads, so you can edit and re-drive without relaunching.
-- **Isolation:** two runs can be up at once, because each has its own port and run directory. Never drive the production container (`mr4x2-blog-hugo-blog-1`) or https://mr4x2.com for UI journeys. The live site is only for the deploy feature's read-only checks.
+- `local` renders to `public/`, which is gitignored. A page that no longer exists is still served from a file an earlier run left there, so a removed tag page can answer 200 on a stale tree. Delete `public/` before you launch `local`, and do not delete it while a `local` run is up. `prod` never sees `public/`, because `.dockerignore` leaves it out of the build.
+- **Isolation:** two runs can be up at once, because each has its own port and run directory. Two `local` runs share `public/`, though, so a page can carry the other run's base URL and live-reload port. Launch one at a time when a check reads absolute URLs. Never drive the production container (`mr4x2-blog-hugo-blog-1`) or https://mr4x2.com for UI journeys. The live site is only for the deploy feature's read-only checks.
 
 ## Doctor
 
@@ -41,7 +42,7 @@ This is read-only. It checks that the process or container belongs to this run, 
 Pages are driven with `drive.mjs`. Steps are JSON objects, and the run stops at nothing: every step is recorded.
 
 ```bash
-node $V/drive.mjs --run RUN_ID --name JOURNEY [--no-js] [--width 390] steps.json   # or `-` to read the steps from stdin
+node $V/drive.mjs --run RUN_ID --name JOURNEY [--no-js] [--dark] [--width 390] steps.json   # or `-` to read the steps from stdin
 ```
 
 | Step | Effect |
@@ -54,8 +55,16 @@ node $V/drive.mjs --run RUN_ID --name JOURNEY [--no-js] [--width 390] steps.json
 | `{"eval": "<js expr>"}` | Record a value. |
 | `{"scroll": {"role": "heading", "name": "…"}}` | Scroll the target into the middle of the viewport, which also triggers lazy images there. |
 | `{"shot": "label"}` / `{"shot": "label", "viewport": true}` / `{"dom": "label"}` | Save a full-page PNG (capped at 4000 px, with `truncatedAt` recorded in `results.json`), a PNG of the viewport only, or the current DOM as HTML. |
+| `{"key": "k", "ctrl": true}` | Press a key through the browser's input path, so the page sees real `keydown` events. Names: a character, `Escape`, `Enter`, `Tab`, `ArrowUp`, `ArrowDown`. Modifiers: `ctrl`, `meta`, `shift`, `alt`. |
+| `{"type": "Bangkok"}` | Type text into the focused element, like a keyboard or an input method would. |
+| `{"hover": target}` / `{"tap": target}` | Move the real mouse to the center of a target, or click it. A `[x, y]` pair works as the target. |
+| `{"media": {"prefers-color-scheme": "dark"}}` | Emulate CSS media features for the rest of the journey (`prefers-color-scheme`, `prefers-reduced-motion`). |
+| `{"block": ["*main.*.js"]}` | Block requests whose URL matches a pattern, for the rest of the journey. Use it to see the page when a script never arrives. |
+| `{"inject": "<js source>"}` | Run a script in the page's own world at the start of every later navigation, for example to spy on a call the page makes. It does not touch the current page. |
+| `{"early": "<js expr>"}` | Arm a probe for the next navigation. In its first frame the page stores the JSON of the expression in `data-first-frame` on `<html>`, so an `expect` can prove what the first paint looked like. |
+| `{"text": "label"}` | Save the theme's visible text as `NN-label.rendered.txt` and fail the step on any slop pattern in it. See Slop check. |
 
-- Expressions run in an isolated world, so they also work with `--no-js`. They can use `$(target)` and `$$(target)`, where a target is a selector string or `{role, name}`, plus `visible(el)` and `nameOf(el)`. The roles are `button`, `link`, `searchbox`, `heading`, `status`, `group` and `listitem`.
+- Expressions run in an isolated world, so they also work with `--no-js`. They can use `$(target)` and `$$(target)`, where a target is a selector string or `{role, name}`, plus `visible(el)`, `nameOf(el)` and `VW`, the viewport width the driver emulates. The roles are `button`, `link`, `searchbox`, `heading`, `status`, `group` and `listitem`.
 - Prefer `{role, name}` and ARIA labels over classes. The Tailwind classes change with the theme (#16).
 - Any uncaught page exception fails the journey and goes to `console.log`.
 - A click that navigates is fine: the next step re-attaches to the new page. Follow it with a `wait` on `location.pathname`.
@@ -73,6 +82,20 @@ node $V/drive.mjs --run RUN_ID --name JOURNEY [--no-js] [--width 390] steps.json
 - Mocks are only acceptable at the Raindrop API boundary, through the unit tests. Journeys use the real API, or skip and say so.
 - Report a skipped or unreachable entry point as **skipped, with the reason**. Never report it as verified through some other path.
 
+## Slop check
+
+CLAUDE.md has a "Visual rules" section and an "Avoid slop" section. The second ends in a `grep` that must print nothing before any work is finished. This skill never keeps its own copy of it.
+
+```bash
+$V/slop-check.sh                      # scan this tree
+SLOP_ROOT=/path/to/copy $V/slop-check.sh   # scan a copy, for example one with a planted violation
+```
+
+- The script reads the `grep` line under `## Avoid slop` in `CLAUDE.md` at run time and runs it from the repo root. It prints matches as `file:line:text` and exits 1 on a match, 0 on none, and 2 when it cannot find or run the rule.
+- The grep reads source only. Its rendered half is the `text` step: after each page state a journey cares about, `{"text": "label"}` reads the visible text and the `aria-label`, `placeholder`, `title` and `alt` values of the theme (header, footer, home intro, search popup, tag lists, 404 page) and fails the step on an emoji, "lorem", "Coming soon" or "Something went wrong". It skips `.prose` (post and About bodies), `.post` rows, Reading bookmarks (`li[data-tags]`) and search results (`[role=option]`), which hold the author's and other people's text.
+- Prove the check still bites: run any journey with `VERIFY_PLANT_SLOP=1`. The run injects "Coming soon" and an emoji into the header before each `text` step, writes its evidence to `<journey>-planted-slop/`, and must exit non-zero. If it passes, the check is broken.
+- Reread your `git diff` as well. The grep cannot see a comment that restates its code.
+
 ## Cleanup
 
 ```bash
@@ -87,6 +110,7 @@ $V/verify.sh list           # shows any runs still up
 ## Helpers
 
 - `scripts/verify.sh launch [local|prod] | doctor RUN_ID | stop RUN_ID | list`
-- `scripts/drive.mjs --run RUN_ID --name JOURNEY [--no-js] [--width N] [--height N] STEPS.json|-`
+- `scripts/drive.mjs --run RUN_ID --name JOURNEY [--no-js] [--dark] [--width N] [--height N] STEPS.json|-`
+- `scripts/slop-check.sh` runs the CLAUDE.md "Avoid slop" grep.
 
 Both are executable and dependency-free: bash, curl, python3, Node ≥ 22 for the built-in WebSocket, Docker for `prod` mode, and a cached Playwright Chromium.

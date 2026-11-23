@@ -1,7 +1,7 @@
 #!/usr/bin/env node
-// usage: drive.mjs --run RUN_ID --name JOURNEY [--no-js] [--width 1280] [--height 900] STEPS.json|-
+// usage: drive.mjs --run RUN_ID --name JOURNEY [--no-js] [--dark] [--width 1280] [--height 900] STEPS.json|-
 import { spawn } from "node:child_process";
-import { readFileSync, writeFileSync, mkdirSync, existsSync, readdirSync } from "node:fs";
+import { readFileSync, writeFileSync, appendFileSync, mkdirSync, existsSync, readdirSync, rmSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
 import { homedir } from "node:os";
 import { fileURLToPath } from "node:url";
@@ -9,7 +9,7 @@ import { fileURLToPath } from "node:url";
 const args = process.argv.slice(2);
 const opt = (k, d) => { const i = args.indexOf(k); return i >= 0 ? args.splice(i, 2)[1] : d; };
 const flag = (k) => { const i = args.indexOf(k); return i >= 0 ? (args.splice(i, 1), true) : false; };
-const run = opt("--run"), name = opt("--name"), noJs = flag("--no-js");
+const run = opt("--run"), name = opt("--name"), noJs = flag("--no-js"), dark = flag("--dark");
 const width = +opt("--width", 1280), height = +opt("--height", 900);
 const stepsArg = args[0];
 if (!run || !name || !stepsArg) { console.error("usage: drive.mjs --run RUN_ID --name JOURNEY [--no-js] STEPS.json|-"); process.exit(2); }
@@ -17,7 +17,8 @@ if (!run || !name || !stepsArg) { console.error("usage: drive.mjs --run RUN_ID -
 const repo = resolve(dirname(fileURLToPath(import.meta.url)), "../../../..");
 const runDir = join(repo, ".verify/runs", run);
 const env = Object.fromEntries(readFileSync(join(runDir, "instance.env"), "utf8").trim().split("\n").map((l) => l.split(/=(.*)/s).slice(0, 2)));
-const out = join(runDir, name);
+const plant = !!process.env.VERIFY_PLANT_SLOP;
+const out = join(runDir, plant ? `${name}-planted-slop` : name);
 mkdirSync(out, { recursive: true });
 const steps = JSON.parse(stepsArg === "-" ? readFileSync(0, "utf8") : readFileSync(stepsArg, "utf8"));
 
@@ -29,6 +30,8 @@ function findChrome() {
   throw new Error("no Chromium found; set CHROME=/path/to/chrome");
 }
 
+// A fresh profile per journey, so a saved theme or a played intro never leaks into the next one.
+rmSync(join(runDir, "chrome-profile"), { recursive: true, force: true });
 const chrome = spawn(findChrome(), ["--headless", "--no-sandbox", "--disable-gpu", "--hide-scrollbars", `--window-size=${width},${height}`, "--remote-debugging-port=0",
   `--user-data-dir=${join(runDir, "chrome-profile")}`, "about:blank"], { stdio: ["ignore", "ignore", "pipe"] });
 const wsUrl = await new Promise((ok, fail) => {
@@ -64,6 +67,7 @@ listeners.push((m) => {
 const { targetId } = await send("Target.createTarget", { url: "about:blank" });
 ({ sessionId: session } = await send("Target.attachToTarget", { targetId, flatten: true }));
 await send("Page.enable"); await send("Runtime.enable");
+
 // A real window smaller than the emulated viewport makes captures tile.
 let windowId, frameH = 0;
 {
@@ -78,6 +82,9 @@ let windowId, frameH = 0;
   frameH = (await send("Browser.getWindowBounds", { windowId })).bounds.height - height;
 }
 await send("Emulation.setDeviceMetricsOverride", { width, height, deviceScaleFactor: 1, mobile: width < 600 });
+// Headless Chromium draws no frames until the first capture, so transitions, rAF and media-query events stall without this.
+await send("Page.captureScreenshot", { format: "png" });
+if (dark) await send("Emulation.setEmulatedMedia", { features: [{ name: "prefers-color-scheme", value: "dark" }] });
 if (noJs) await send("Emulation.setScriptExecutionDisabled", { value: true });
 
 // In-page helpers, evaluated in an isolated world so they work with page JS disabled.
@@ -86,6 +93,7 @@ const { executionContextId: ctx } = await (async () => {
   return send("Page.createIsolatedWorld", { frameId: tree.frameTree.frame.id, worldName: "drive" });
 })();
 const HELPERS = `
+  const VW = ${width};
   const ROLES = { button: 'button,[role=button]', link: 'a[href],[role=link]', searchbox: 'input[type=search],[role=searchbox]',
     heading: 'h1,h2,h3,h4,h5,h6,[role=heading]', status: '[role=status],output', group: '[role=group],fieldset', listitem: 'li,[role=listitem]' };
   const visible = (el) => !!el && !el.closest('[hidden]') && el.getClientRects().length > 0;
@@ -114,8 +122,32 @@ async function evaluate(expr, tries = 20) {
   }
 }
 const T = (t) => JSON.stringify(t);
+const KEYS = { Escape: 27, Enter: 13, Tab: 9, ArrowUp: 38, ArrowDown: 40, "/": 191 };
 const FULL_MAX = 4000;
-const results = []; let n = 0; let failed = false;
+
+// The same patterns as CLAUDE.md "Avoid slop", applied to what the theme rendered. Post bodies, post rows,
+// Reading bookmarks and search results hold the author's and other people's text, so they are skipped.
+const SKIP_TEXT = ".prose, .post, li[data-tags], [role=option]";
+const TEXT_RULES = [
+  ["emoji", /[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}]|\p{Emoji_Presentation}|\u{FE0F}/gu],
+  ["lorem-ipsum", /lorem/giu],
+  ["coming-soon", /coming soon/giu],
+  ["something-went-wrong", /something went wrong/giu],
+];
+const READ_THEME_TEXT = `(() => {
+  const shown = (el) => visible(el) && getComputedStyle(el).visibility !== 'hidden' && !el.closest(${T(SKIP_TEXT)});
+  const lines = [];
+  const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT);
+  for (let n; (n = walker.nextNode());) {
+    const p = n.parentElement;
+    if (p && !/^(SCRIPT|STYLE|NOSCRIPT)$/.test(p.tagName) && n.nodeValue.trim() && shown(p)) lines.push(n.nodeValue.trim());
+  }
+  const attrs = [...document.body.querySelectorAll('[aria-label],[placeholder],[title],img[alt]')].filter(shown)
+    .flatMap((el) => ['aria-label', 'placeholder', 'title', 'alt'].filter((a) => el.getAttribute(a)).map((a) => a + '=' + el.getAttribute(a)));
+  return { visibleText: lines.join('\\n'), attributeText: attrs.join('\\n') };
+})()`;
+const PLANT_SLOP = `(() => { const s = document.createElement('span'); s.textContent = 'Coming soon \\u{1F389}'; document.querySelector('header').append(s); })()`;
+const results = []; let n = 0; let failed = false; let earlyId;
 const label = (s, d) => String(s.label || d).replace(/[^a-z0-9-]+/gi, "-").slice(0, 40);
 
 for (const s of steps) {
@@ -159,6 +191,57 @@ for (const s of steps) {
       const shot = await send("Page.captureScreenshot", { format: "png" });
       if (h !== height) await resize(height);
       const f = join(out, `${String(n).padStart(2, "0")}-${label(s, s.shot)}.png`); writeFileSync(f, Buffer.from(shot.data, "base64")); rec.result = f;
+    } else if (s.key !== undefined) {
+      const vk = KEYS[s.key] ?? s.key.toUpperCase().charCodeAt(0);
+      const mods = (s.alt ? 1 : 0) | (s.ctrl ? 2 : 0) | (s.meta ? 4 : 0) | (s.shift ? 8 : 0);
+      const printable = s.key.length === 1 && !s.ctrl && !s.meta;
+      const ev = { key: s.key, code: s.key.length === 1 && /[a-z]/i.test(s.key) ? `Key${s.key.toUpperCase()}` : s.key === "/" ? "Slash" : s.key, windowsVirtualKeyCode: vk, modifiers: mods };
+      await send("Input.dispatchKeyEvent", { type: printable ? "keyDown" : "rawKeyDown", ...ev, ...(printable ? { text: s.key } : {}) });
+      await send("Input.dispatchKeyEvent", { type: "keyUp", ...ev });
+      rec.result = s.key;
+    } else if (s.type !== undefined) {
+      await send("Input.insertText", { text: s.type });
+      rec.result = s.type;
+    } else if (s.hover !== undefined || s.tap !== undefined) {
+      const at = s.hover !== undefined ? s.hover : s.tap;
+      const [x, y] = Array.isArray(at) ? at : await evaluate(`(() => { const el = $(${T(at)}); if (!el) throw new Error('not found: ' + ${T(T(at))}); const r = el.getBoundingClientRect(); return [r.left + r.width / 2, r.top + r.height / 2]; })()`);
+      await send("Input.dispatchMouseEvent", { type: "mouseMoved", x, y });
+      if (s.tap !== undefined) {
+        await send("Input.dispatchMouseEvent", { type: "mousePressed", x, y, button: "left", clickCount: 1 });
+        await send("Input.dispatchMouseEvent", { type: "mouseReleased", x, y, button: "left", clickCount: 1 });
+      }
+      rec.result = [Math.round(x), Math.round(y)];
+    } else if (s.media !== undefined) {
+      const features = Object.entries(s.media).map(([name, value]) => ({ name, value }));
+      await send("Emulation.setEmulatedMedia", { features });
+      rec.result = features;
+    } else if (s.block !== undefined) {
+      await send("Network.enable");
+      await send("Network.setBlockedURLs", { urls: s.block });
+      rec.result = s.block;
+    } else if (s.inject !== undefined) {
+      await send("Page.addScriptToEvaluateOnNewDocument", { source: s.inject });
+      rec.result = "injected";
+    } else if (s.early !== undefined) {
+      const source = `(function probe() { requestAnimationFrame(() => { const r = document.documentElement; try { r.setAttribute("data-first-frame", JSON.stringify(${s.early})); } catch { probe(); } }); })();`;
+      if (earlyId) await send("Page.removeScriptToEvaluateOnNewDocument", { identifier: earlyId });
+      earlyId = (await send("Page.addScriptToEvaluateOnNewDocument", { source })).identifier;
+      rec.result = "armed";
+    } else if (s.text !== undefined) {
+      if (plant) await evaluate(PLANT_SLOP);
+      const { visibleText, attributeText } = await evaluate(READ_THEME_TEXT);
+      const findings = [];
+      for (const [id, re] of TEXT_RULES) {
+        for (const [source, text] of [["visible-text", visibleText], ["attributes", attributeText]]) {
+          for (const m of text.normalize("NFC").matchAll(re)) findings.push({ rule: id, source, match: m[0] });
+        }
+      }
+      const base = `${String(n).padStart(2, "0")}-${label(s, s.text)}`;
+      writeFileSync(join(out, `${base}.rendered.txt`), `# visible text\n${visibleText}\n# attributes\n${attributeText}\n`);
+      appendFileSync(join(out, "rendered-text.jsonl"), JSON.stringify({ label: s.text, findings }) + "\n");
+      rec.result = findings;
+      rec.pass = findings.length === 0;
+      if (!rec.pass) failed = true;
     } else if (s.dom !== undefined) {
       const f = join(out, `${String(n).padStart(2, "0")}-${label(s, s.dom)}.html`); writeFileSync(f, await evaluate("document.documentElement.outerHTML")); rec.result = f;
     } else throw new Error("unknown step");

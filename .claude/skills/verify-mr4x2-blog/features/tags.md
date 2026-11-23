@@ -1,17 +1,19 @@
 # Tags
 
-The Tags page lists every Post tag with its post count. Each tag opens a page listing the Posts that carry it. Bookmark tags from the Reading page never appear here.
+`/tags/` shows `$ ls ~/tags` and every Post tag in monospace with its Post count (`#travel (2)`), most used first. Each tag opens `/tags/<tag>/`, which shows `$ ls -t ~/posts --tag=<tag>` and the same rows as the home page. Tags from About and Bookmark tags from the Reading page never appear here.
 
 ## Sub-features
 
 - `tags-index` lists all Post tags with counts at `/tags/`.
-- `tags-page` lists the Posts with a given tag at `/tags/<tag>/`.
-- `tags-no-bookmark-tags` keeps Bookmark tags off this page (after #15).
+- `tags-page` lists the Posts with a given tag at `/tags/<tag>/`, newest first.
+- `tags-line` links the same tags under `$ ls -t ~/posts` on the home page.
+- `tags-removed` gives `/tags/readme/` and `/tags/info/` no page. They came from About, which no longer has tags. This is the one URL change in the new theme.
+- `tags-no-bookmark-tags` keeps Bookmark tags off this page.
 
 ## How to get to it (user POV)
 
-- Click `Tags` in the header menu.
-- Click a tag under a Post, or in the home sidebar.
+- Click `tags/` in the header menu.
+- Click a tag under a Post, in a post row, or in the home page tag line.
 
 ## Driving it with drive.mjs
 
@@ -19,13 +21,18 @@ Preconditions:
 
 - A run is healthy per `doctor`.
 
-- **Open from the menu.** `{"goto": "/"}`, `{"click": {"role": "link", "name": "Tags"}}`, `{"wait": "location.pathname === '/tags/'"}`, `{"shot": "tags"}`.
-- **Index contents.** `{"expect": "$$('main a').map(a => nameOf(a)).includes('Travel(2)')"}` holds.
-- **Tag page.** `{"click": {"role": "link", "name": "Travel(2)"}}`, `{"wait": "location.pathname === '/tags/travel/'"}`, then `{"expect": "$$('main li h2 a').length", "equals": 2}`.
-- **No Bookmark tags (after #15).** Take a tag that exists only on Bookmarks in `data/reading.json` (for example `ceph`). `{"expect": "!$$('main a').some(a => /^ceph\\b/i.test(a.textContent.trim()))"}` holds on `/tags/`, and `GET /tags/ceph/` returns 404.
-- **Proof.** `{"shot": "tag-travel"}`.
+```bash
+K=.claude/skills/verify-mr4x2-blog
+node $K/scripts/drive.mjs --run RUN_ID --name tags $K/journeys/tags.json
+node $K/scripts/drive.mjs --run RUN_ID --name tags-dark --dark $K/journeys/tags.json
+node $K/scripts/drive.mjs --run RUN_ID --name tags-phone --width 390 --height 844 $K/journeys/tags.json
+```
+
+- **`tags.json`** opens `tags/` from the menu and checks the command line, the five tags with their counts in order (`#travel (2)`, `#fossasia (1)`, `#france (1)`, `#openinfra-submit (1)`, `#thailand (1)`), that About and Bookmark tags are absent, and the heading. It saves a screenshot and the rendered text, opens `#travel (2)` and checks the command line and the two Posts newest first, opens `/tags/thailand/` and the `#france` link on the home page, and fetches `/tags/readme/`, `/tags/info/` and `/tags/ceph/`, which must all be 404.
+- **Proof.** Keep `tags` and `tag-travel`.
 
 ## Gotchas
 
-- A tag's link name is its title-cased page title plus the count, with no space (`Openinfra Submit(1)`). The URL is the urlized tag (`/tags/openinfra-submit/`). Match names with `nameOf`, and match URLs on the path.
-- Hugo also builds an empty `/categories/`. Nothing links to it, so ignore it.
+- A tag's link name is `#` plus its `urlize`d term plus the count (`#openinfra-submit (1)`). The URL is `/tags/openinfra-submit/`. Match names with `nameOf`, and match URLs on the path.
+- Hugo also builds an empty `/categories/`. Nothing links to it. It uses the same template and shows `$ ls ~/categories` with no tags.
+- The local server renders to `public/` and serves a file from an earlier run when the page no longer exists, so `/tags/readme/` can answer 200 on a stale tree. Delete `public/` before launching.

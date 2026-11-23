@@ -1,36 +1,54 @@
-# Home post list
+# Home page
 
-The home page shows "All Posts", newest first, each with its date, title, Post tags, summary and a "Read Article" link. Beside the list, on wide screens, it shows a "Filter by tag" sidebar with post counts. The header menu on every page links to Contact, Tags, About (and Reading after #15) and GitHub.
+The home page opens with `$ whoami` and one line about the author, then `$ ls -t ~/posts`, a line of tag links, and the Posts newest first. A row shows the date (`2026-02-17`), the title, the summary, the tags (`#travel`) and a thumbnail from the front-matter `image`. The header and footer are on every page and are checked here too: logo, menu (`reading/`, `tags/`, `about/`, `contact`), Search, theme toggle, and the footer line. On the first visit of a browser session `whoami` types itself out while the list fades in. Later visits in the session show everything at once.
 
 ## Sub-features
 
-- `home-list` lists every Post (and today also About), with a title link and "Read Article".
-- `home-sidebar` lists every Post tag with its count (`Travel(2)`), on screens 768 px and wider.
-- `home-menu` shows the header links in order, with GitHub opening in a new tab.
-- `home-no-reading` shows that the Reading page is linked from the menu only, never in the list (after #15).
+- `home-whoami` shows the line from `params.whoami` under the `$ whoami` prompt, with no accent border.
+- `home-list` lists the Posts only, newest first. About and Reading never appear in it.
+- `home-tags` shows one link per Post tag under `$ ls -t ~/posts`, most used first, each going to `/tags/<tag>/`.
+- `home-thumb` shows a resized WebP thumbnail per row that has an `image`, never the original photo.
+- `home-menu` shows the header links in order, with `contact` as a `mailto:` link.
+- `home-intro` types `whoami` once per session at 65 ms per character after a 180 ms pause. The list fades in from load and does not wait for the typing.
+- `home-reduced` types and moves nothing under `prefers-reduced-motion: reduce`, and fades the content in over 200 ms.
+- `home-nojs` shows all text with JavaScript off. The Search and theme buttons stay hidden.
+- `home-failsafe` shows the text after 2 seconds even when `main.js` never runs.
 
 ## How to get to it (user POV)
 
 - Open the site root `/`.
-- Click the site title or the logo in the header on any page.
+- Click the logo in the header on any page.
 
 ## Driving it with drive.mjs
 
 Preconditions:
 
 - A run is healthy per `doctor`.
-- The working tree has the two travel Posts and the About page.
+- The working tree has the two travel Posts and the About page, and `data/reading.json` is the committed one.
 
-- **Open home.** `{"goto": "/"}`, `{"shot": "home"}`. The `<h1>` reads `All Posts`.
-- **List contents.** `{"expect": "$$('main li h2 a').map(a => a.textContent.trim())", "label": "post titles"}` returns titles that include `A great trip in Thailand` and `Memorable days in France`.
-- **Read Article.** `{"expect": "$$({role:'link', name:'Read Article'}).length", "equals": 3}` holds on `main` today: two Posts plus About.
-- **Sidebar.** `{"expect": "$$('aside nav a').map(a => nameOf(a)).includes('Travel(2)')"}` holds at width 1280. Names are the title-cased tag plus the count, with no space, such as `Travel(2)` or `Openinfra Submit(1)`. At `--width 390`, `{"expect": "!visible($('aside'))"}` holds.
-- **Menu.** `{"expect": "$$('header a').map(a => a.textContent.trim()).filter(Boolean)"}` starts with `mr4x2 blog`, then `Contact, Tags, About`. After #15 it's `Contact, Tags, Reading, About`.
-- **Reading not listed (after #15).** `{"expect": "!$$('main li a').some(a => a.href.endsWith('/reading/'))", "label": "reading not in All Posts"}`.
-- **Proof.** `{"shot": "home-final"}` at 1280 and at 390.
+```bash
+K=.claude/skills/verify-mr4x2-blog
+node $K/scripts/drive.mjs --run RUN_ID --name home $K/journeys/home.json
+node $K/scripts/drive.mjs --run RUN_ID --name home-dark --dark $K/journeys/home.json
+node $K/scripts/drive.mjs --run RUN_ID --name home-phone --width 390 --height 844 $K/journeys/home.json
+node $K/scripts/drive.mjs --run RUN_ID --name home-intro $K/journeys/home-intro.json
+node $K/scripts/drive.mjs --run RUN_ID --name home-intro-blocked $K/journeys/home-intro-blocked.json
+node $K/scripts/drive.mjs --run RUN_ID --name home-reduced $K/journeys/home-reduced.json
+node $K/scripts/drive.mjs --run RUN_ID --name home-nojs --no-js $K/journeys/home-nojs.json
+```
+
+- **`home.json`** waits for the intro to end, then checks the `whoami` prompt and line, the `ls` line, the tag links (`#travel`, `#fossasia`, `#france`, `#openinfra-submit`, `#thailand`), the titles and dates newest first, each row's tags, that About and Reading are not listed, that there is no pager, a loaded thumbnail per row under 30 KB, and no accent border on `whoami`. It saves a screenshot and the rendered text, then clicks `tags/`, `#travel`, a Post title and the logo. Run it with `--dark` and with `--width 390` too.
+- **`home-intro.json`** samples the page every 50 ms during the first visit. `whoami` must grow one character at a time while the class on `<html>` is `intro-typing`, the answer line must stay hidden until the typing ends, and the list must already be fading in. It ends with no class and the key `mk-intro-seen` set. A second visit must show everything at once.
+- **`home-intro-blocked.json`** blocks `main.*.js`. The page must keep the hidden state (`intro-pending`, every opacity 0), then show everything after the 2 second failsafe.
+- **`home-reduced.json`** never types, never moves (`transform: none`), fades in over 0.2 s and keeps the logo cursor solid.
+- **`home-nojs.json`** checks the text, the header links and the hidden buttons with JavaScript off.
+- **Proof.** Keep `home`, `after-intro`, `hidden-state` and `failsafe`, at 1280 and 390, light and dark.
 
 ## Gotchas
 
-- About is built like a Post, so it appears in the list and adds the `readme` and `info` tags to the sidebar. That's today's behavior, not a bug introduced by your change.
-- `pagerSize` is 5. The pager only appears with 6 or more listed pages.
+- Every journey starts with a fresh browser profile, so the intro plays on the first `goto`. A journey that does not care about it waits for `!document.documentElement.className.includes('intro')`.
+- The thumbnail comes from `resources.Get "photos/<image>"`, where `static/trip-in-*` is mounted at `assets/photos` in `hugo.toml`. A Post whose `image` is not under `static/trip-in-*` gets a row with no thumbnail.
+- Tag names come from the term key through `urlize`, so `openinfra submit` shows as `#openinfra-submit`.
+- `pagerSize` is 5. The pager shows only with 6 or more listed Posts, and says `newer` and `older`.
+- Headless Chromium draws nothing until its first capture. `drive.mjs` takes one at startup, so transitions and `requestAnimationFrame` run. Do not remove it.
 - The Contact link is a `mailto:`. Don't click it in journeys.

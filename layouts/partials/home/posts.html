@@ -1,0 +1,18 @@
+<div class="sec reveal" style="--i: 1">
+  <p class="cmd">$ <b>ls -t ~/posts</b></p>
+  <ul class="tag-line">
+    {{ range site.Taxonomies.tags.ByCount }}
+      <li>
+        <a href="{{ .Page.RelPermalink }}">#{{ .Page.Data.Term | urlize }}</a>
+      </li>
+    {{ end }}
+  </ul>
+</div>
+
+<ul class="posts">
+  {{ range $i, $post := .Paginator.Pages }}
+    {{ partial "post-summary.html" (dict "post" $post "i" (add $i 2)) }}
+  {{ end }}
+</ul>
+
+{{ partial "pagination.html" . }}

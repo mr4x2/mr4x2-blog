@@ -15,7 +15,7 @@ This directory is the maintained source for verifying what readers and the autho
 - Each journey is a JSON array of `drive.mjs` steps, run with `--name <feature-id>` so its evidence lands in its own folder.
 - Use roles and accessible names (`{"role": "link", "name": "Reading"}`) or ARIA labels, never Tailwind classes.
 - Start every journey with a `goto`. Don't rely on the state a previous journey left behind.
-- Run a phone-width pass (`--width 390`) for any layout change. The tag sidebar on the home page hides below 768 px by design.
+- Run a phone-width pass (`--width 390`) and a dark pass (`--dark`) for any layout change. The theme follows `prefers-color-scheme` when the reader has not picked one, so `--dark` needs no saved choice.
 - Terms (Post, Bookmark, Note, Excerpt, Read date…) are defined in the repo's `CONTEXT.md`.
 
 ## Proof and skip reporting
@@ -32,9 +32,11 @@ Each feature file starts with an H1 title and a paragraph describing the behavio
 
 ## Features
 
-- [Home post list](./home.md) covers "All Posts", the tag sidebar and the header menu.
-- [Post page](./post.md) covers the date, title, table of contents, centered photos with captions, tags, comments and the back link.
-- [Tags](./tags.md) covers the Tags index and each tag's post list.
+- [Home page](./home.md) covers the header and footer, the `whoami` intro and its typing, the tag line and the Post rows.
+- [Post page](./post.md) covers the date and reading time, tags, the `$ cat toc` table of contents, centered photos with captions, code colors, older and newer links, giscus in the site theme, and About as a plain page.
+- [Tags](./tags.md) covers `/tags/`, each tag page, the removed `readme` and `info` tags, and that Bookmark tags stay off it.
+- [Search popup](./search.md) covers Ctrl K, `/`, Pagefind results for `Bangkok`, the keys, focus return and the missing-index message.
+- [404 page](./not-found.md) covers the `bash: cd:` line, its path from the address bar, and the no-JavaScript fallback.
 - [Reading page](./reading.md) covers the `/reading` Bookmark list, the tag filter, search, the no-JS fallback and the empty state. It's **new in #15**.
 - [Raindrop sync](./sync.md) covers the author's sync command: the happy path, a bad token, missing settings, and leaving the file alone when nothing changed.
 - [Deploy chain](./deploy.md) covers the read-only checks that a merge or sync reached the live site.

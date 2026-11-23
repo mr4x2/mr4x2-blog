@@ -1,0 +1,10 @@
+[
+  {"media": {"prefers-reduced-motion": "reduce"}},
+  {"goto": "/"},
+  {"expect": "new Promise(done => { const root = document.documentElement, log = []; const t = setInterval(() => { log.push({ cls: root.className, typed: $('[data-typed]').textContent, move: getComputedStyle($('.who-out')).transform + getComputedStyle($('.post')).transform }); if (log.length >= 16) { clearInterval(t); done({ neverTyping: log.every(s => !s.cls.includes('intro-typing')), wordNeverRetyped: log.every(s => s.typed === 'whoami'), neverMoves: log.every(s => s.move === 'nonenone'), settled: log[log.length - 1].cls === '' }); } }, 50); })", "equals": {"neverTyping": true, "wordNeverRetyped": true, "neverMoves": true, "settled": true}, "label": "nothing types or moves", "timeout": 8000},
+  {"expect": "[+getComputedStyle($('.who-out')).opacity, +getComputedStyle($('.post')).opacity]", "equals": [1, 1], "label": "content is shown"},
+  {"expect": "getComputedStyle($('.who-out')).transitionDuration", "equals": "0.2s", "label": "fade is 200ms"},
+  {"expect": "getComputedStyle($('.logo > span:last-child')).animationName", "equals": "none", "label": "cursor stays solid"},
+  {"shot": "reduced"},
+  {"text": "reduced"}
+]

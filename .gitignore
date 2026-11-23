@@ -2,6 +2,8 @@
 public/
 resources/
 .hugo_build.lock
+assets/jsconfig.json
+static/pagefind/
 
 # Node.js
 node_modules/
@@ -17,3 +19,6 @@ Thumbs.db
 
 # Python
 __pycache__/
+
+# brainstorming companion mockups
+.superpowers/

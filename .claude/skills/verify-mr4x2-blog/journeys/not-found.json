@@ -1,0 +1,11 @@
+[
+  {"goto": "/no-such-page/"},
+  {"expect": "fetch('/no-such-page/').then(r => r.status)", "equals": 404, "label": "the server answers 404"},
+  {"expect": "$('main .cmd').textContent.replace(/\\s+/g, ' ').trim()", "equals": "bash: cd: /no-such-page/: No such file or directory", "label": "the path comes from the address bar"},
+  {"expect": "$('h1').textContent.trim()", "equals": "Page not found", "label": "the page has a heading"},
+  {"expect": "$$('header nav a').length", "equals": 4, "label": "the header is there"},
+  {"shot": "not-found"},
+  {"text": "not-found"},
+  {"click": {"role": "link", "name": "cd ~"}, "label": "link to the home page"},
+  {"wait": "location.pathname === '/'"}
+]

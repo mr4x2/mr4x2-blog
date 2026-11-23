@@ -1,0 +1,31 @@
+{{ with site.Params.giscus }}
+  <div class="comments">
+    <script>
+      (function () {
+        var script = document.createElement("script");
+        var attrs = {{ dict
+          "repo" .repo
+          "repo-id" .repoId
+          "category" .category
+          "category-id" .categoryId
+          "mapping" .mapping
+          "strict" "0"
+          "reactions-enabled" .reactionsEnabled
+          "emit-metadata" "0"
+          "input-position" .inputPosition
+          "lang" .lang
+          | jsonify
+          | safeJS
+        }};
+        Object.keys(attrs).forEach(function (name) {
+          script.setAttribute("data-" + name, attrs[name]);
+        });
+        script.setAttribute("data-theme", document.documentElement.dataset.theme);
+        script.src = "https://giscus.app/client.js";
+        script.crossOrigin = "anonymous";
+        script.async = true;
+        document.currentScript.after(script);
+      })();
+    </script>
+  </div>
+{{ end }}
