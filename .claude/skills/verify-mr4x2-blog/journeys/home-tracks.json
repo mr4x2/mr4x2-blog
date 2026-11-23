@@ -1,0 +1,16 @@
+[
+  {"goto": "/"},
+  {"wait": "!document.documentElement.className.includes('intro')", "label": "intro finished"},
+  {"expect": "$('.who').nextElementSibling.matches('section.tracks')", "label": "the block sits right under whoami"},
+  {"expect": "$('.tracks .cmd').textContent.replace(/\\s+/g, ' ').trim()", "equals": "$ top --tracks --last 4w", "label": "prompt reads top"},
+  {"expect": "$$('.track-rank').map(t => t.textContent.trim())", "equals": ["01", "02", "03", "04", "05"], "label": "two-digit ranks in order"},
+  {"expect": "$$('.track-title').map(t => t.textContent.trim())", "equals": ["Holocene", "Motion Sickness", "Everything In Its Right Place (Live From The Basement Sessions, Remastered Deluxe Edition With Extra Long Title)", "Tiếng Việt Và Những Đêm Dài", "Rock & \"Roll\" <b>"], "label": "titles in Spotify's order, the last one escaped to literal text"},
+  {"expect": "$$('.tracks-list li')[1].querySelector('.track-artists').textContent.replace(/\\s+/g, ' ').trim()", "equals": "— Phoebe Bridgers, Julien Baker", "label": "artists joined with a comma"},
+  {"expect": "$$('.track-title').length === 5 && $$('.track-title').every(a => a.href.startsWith('https://open.spotify.com/') && a.target === '_blank' && a.rel.includes('noopener'))", "label": "each song opens Spotify in a new tab"},
+  {"expect": "!$('.tracks-list b')", "label": "the escaped <b> in a title is text, not markup"},
+  {"expect": "!/\\d{1,2}:\\d{2}|\\bago\\b|\\d{4}-\\d{2}-\\d{2}/.test($('.tracks').innerText)", "label": "no time anywhere in the block"},
+  {"expect": "[$('.tracks'), $('.sec:has(.tag-line)'), ...$$('.post')].map(e => e.style.getPropertyValue('--i').trim())", "equals": ["1", "2", "3", "4"], "label": "the entrance runs tracks, ls, then the posts"},
+  {"expect": "(function find(rules) { for (const r of rules) { if (r.selectorText && /\\.track-title:hover|\\.tracks-list a:hover/.test(r.selectorText)) return r.parentRule.conditionText + ' ' + r.style.color; if (r.cssRules) { const f = find(r.cssRules); if (f) return f; } } })([...document.styleSheets].flatMap(s => [...s.cssRules]))", "equals": "(hover: hover) and (pointer: fine) var(--accent)", "label": "song links turn accent on hover, for mouse pointers only (headless has no hover, so the rule is read)"},
+  {"expect": "document.documentElement.scrollWidth <= document.documentElement.clientWidth", "label": "long titles wrap instead of scrolling the page"},
+  {"shot": "home-tracks"}
+]

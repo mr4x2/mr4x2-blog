@@ -1,0 +1,22 @@
+{{ with site.Data.top_tracks }}
+  <section class="sec tracks reveal" style="--i: 1">
+    <p class="cmd">$ <b>top --tracks --last 4w</b></p>
+    <ol class="tracks-list">
+      {{ range $i, $track := . }}
+        <li>
+          <span class="track-rank">{{ printf "%02d" (add $i 1) }}</span>
+          <a
+            class="track-title"
+            href="{{ $track.url }}"
+            target="_blank"
+            rel="noopener"
+            >{{ $track.title }}</a
+          >
+          <span class="track-artists">
+            — {{ delimit $track.artists ", " }}</span
+          >
+        </li>
+      {{ end }}
+    </ol>
+  </section>
+{{ end }}

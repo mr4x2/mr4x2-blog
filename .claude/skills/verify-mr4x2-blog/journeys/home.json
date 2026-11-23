@@ -3,7 +3,7 @@
   {"wait": "!document.documentElement.className.includes('intro')", "label": "intro finished"},
   {"expect": "$('.who .cmd').textContent.replace(/\\s+/g, ' ').trim()", "equals": "$ whoami", "label": "prompt reads whoami"},
   {"expect": "$('.who-out').textContent.trim().startsWith('mr8: Ceph object storage engineer')", "label": "whoami line from params"},
-  {"expect": "$('.sec .cmd').textContent.trim()", "equals": "$ ls -t ~/posts", "label": "ls line"},
+  {"expect": "$('.sec:has(.tag-line) .cmd').textContent.trim()", "equals": "$ ls -t ~/posts", "label": "ls line"},
   {"expect": "$$('.tag-line a').map(a => a.textContent.trim())", "equals": ["#travel", "#fossasia", "#france", "#openinfra-submit", "#thailand"], "label": "tag line"},
   {"expect": "$$('.post-title a').map(a => a.textContent.trim())", "equals": ["Memorable days in France", "A great trip in Thailand"], "label": "posts newest first"},
   {"expect": "$$('.post-date').map(d => d.textContent.trim())", "equals": ["2026-02-17", "2025-03-29"], "label": "dates"},

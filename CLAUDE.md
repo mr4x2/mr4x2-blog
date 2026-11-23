@@ -56,6 +56,19 @@ The first rollout of the nginx image needs one extra step. Run `docker compose s
 - `layouts/_default/reading.html` renders it with `site.Data.reading` (`hugo.Data` doesn't exist in Hugo 0.145). The page builds and shows `Nothing here yet.` when the file is missing or `[]`.
 - Run the sync locally with `set -a; . ./.env; set +a; python3 scripts/sync_raindrop.py`. It needs `RAINDROP_TOKEN` (a Raindrop test token) and `RAINDROP_COLLECTION_ID`. Add `--output <file>` to write somewhere else.
 - Run the sync tests with `python3 -m unittest discover -s scripts -v`.
+- Its commit step lives in `scripts/commit_data.sh`, shared with the Top tracks sync.
+
+## Top tracks
+
+The home page lists the author's Top tracks under `whoami`. Terms are defined in `CONTEXT.md`.
+
+- Data flow: Spotify → `.github/workflows/sync-top-tracks.yml` (daily, 03:00 Vietnam time) runs `scripts/sync_top_tracks.py` → `scripts/commit_data.sh` commits `data/top_tracks.json` to `main` → dispatches `hugo.yml` → Docker Hub → Watchtower.
+- `data/top_tracks.json` is generated. Don't edit it by hand: the next sync overwrites it. Each entry is `{title, artists, url}` in Spotify's rank order.
+- The home page never shows a time, a count or a fetch date, and the data file holds none. Privacy is the reason: anything with a time tells when the author listens.
+- `layouts/partials/home/top-tracks.html` renders it with `site.Data.top_tracks`. Nothing renders when the file is missing or `[]`.
+- Run the sync locally with `set -a; . ./.env; set +a; python3 scripts/sync_top_tracks.py`. It needs `SPOTIFY_CLIENT_ID`, `SPOTIFY_CLIENT_SECRET` and `SPOTIFY_REFRESH_TOKEN`. Add `--output <file>` to write somewhere else.
+- Run the tests with `python3 -m unittest discover -s scripts -v`.
+- The refresh token expires 6 months after the login. When the sync fails with `the Spotify login expired or was revoked`, run `python3 scripts/spotify_auth.py`, then `gh secret set SPOTIFY_REFRESH_TOKEN`. Until then the site keeps the last list.
 
 ## Visual rules you can spot in a diff
 

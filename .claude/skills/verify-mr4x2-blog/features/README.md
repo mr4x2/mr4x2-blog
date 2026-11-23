@@ -32,7 +32,7 @@ Each feature file starts with an H1 title and a paragraph describing the behavio
 
 ## Features
 
-- [Home page](./home.md) covers the header and footer, the `whoami` intro and its typing, the tag line, the Post rows, reduced motion and high contrast.
+- [Home page](./home.md) covers the header and footer, the `whoami` intro and its typing, the Top tracks, the tag line, the Post rows, reduced motion and high contrast.
 - [Post page](./post.md) covers the date and reading time, tags, the `$ cat toc` table of contents, centered photos with captions, code colors, older and newer links, giscus in the site theme, and About as a plain page.
 - [Tags](./tags.md) covers `/tags/`, each tag page, the removed `readme` and `info` tags, and that Bookmark tags stay off it.
 - [Search popup](./search.md) covers Ctrl K, `/`, Pagefind results for `Bangkok`, the keys, focus return and the missing-index message.

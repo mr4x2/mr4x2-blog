@@ -1,6 +1,6 @@
 # mr4x2 blog
 
-The author's personal site: their own travel and tech posts, plus a public log of technical articles by other people that they've read.
+The author's personal site: their own travel and tech posts, a public log of technical articles by other people that they've read, and the songs they have on repeat.
 
 ## Posts
 
@@ -41,3 +41,9 @@ _Avoid_: Note, description
 **Read date**:
 The day a Bookmark was added to the Reading collection, in Vietnam time. That is when the author finished reading it.
 _Avoid_: Created date, saved date
+
+## Music
+
+**Top track**:
+One of the five songs the author played most on Spotify over about the last four weeks, in Spotify's own ranking. It carries no time, so the site never shows what the author is playing now or when they last listened.
+_Avoid_: Now playing, recently played, last played
