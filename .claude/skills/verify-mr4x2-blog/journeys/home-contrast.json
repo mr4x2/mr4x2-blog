@@ -8,7 +8,7 @@
   {"expect": "(s => ['--muted', '--faint', '--line', '--accent'].map(v => s.getPropertyValue(v).trim()))(getComputedStyle(document.documentElement))", "equals": ["#52514d", "#6b6a66", "#8f8c84", "#0a6b49"], "label": "high contrast darkens the grays, the lines and the green"},
   {"expect": "[getComputedStyle($('.post-sum')).color, getComputedStyle($('.site-header')).borderBottomColor, getComputedStyle($('.post-tags a')).color]", "equals": ["rgb(82, 81, 77)", "rgb(143, 140, 132)", "rgb(10, 107, 73)"], "label": "summaries, dividers and tag links use them"},
   {"shot": "contrast-light"},
-  {"click": {"role": "button", "name": "Toggle dark mode"}, "label": "toggle to dark"},
+  {"click": "[data-theme-toggle]", "label": "toggle to dark"},
   {"wait": "document.documentElement.dataset.theme === 'dark' && !document.documentElement.classList.contains('theme-reveal')", "timeout": 3000},
   {"expect": "(s => ['--muted', '--faint', '--line', '--accent'].map(v => s.getPropertyValue(v).trim()))(getComputedStyle(document.documentElement))", "equals": ["#b4b9b6", "#959b97", "#646a66", "#3ddc97"], "label": "dark lifts the grays and lines and keeps its green"},
   {"shot": "contrast-dark"}

@@ -4,11 +4,19 @@
   {"expect": "[document.documentElement.dataset.theme, localStorage.getItem('mk-theme')]", "equals": ["dark", null], "label": "no saved choice follows the system"},
   {"media": {"prefers-color-scheme": "light"}},
   {"wait": "document.documentElement.dataset.theme === 'light'", "label": "follows a live system change"},
-  {"click": {"role": "button", "name": "Toggle dark mode"}, "label": "reader picks dark"},
+  {"click": "[data-theme-toggle]", "label": "reader picks dark"},
   {"wait": "document.documentElement.dataset.theme === 'dark' && !document.documentElement.classList.contains('theme-reveal')", "label": "the theme reveal finishes"},
   {"expect": "[document.documentElement.dataset.theme, localStorage.getItem('mk-theme')]", "equals": ["dark", "dark"]},
   {"media": {"prefers-color-scheme": "dark"}},
   {"media": {"prefers-color-scheme": "light"}},
   {"expect": "new Promise(r => setTimeout(() => r(document.documentElement.dataset.theme), 300))", "equals": "dark", "label": "a saved choice ignores the system"},
-  {"shot": "saved-dark-over-light-system"}
+  {"shot": "saved-dark-over-light-system"},
+  {"click": "[data-theme-toggle]", "label": "dark steps to the garden"},
+  {"wait": "document.documentElement.hasAttribute('data-garden') && !document.documentElement.classList.contains('theme-reveal')", "timeout": 3000},
+  {"eval": "(localStorage.removeItem('mk-theme'), 'no saved theme')", "label": "forget the saved theme, so only the garden holds the page"},
+  {"media": {"prefers-color-scheme": "dark"}},
+  {"expect": "new Promise(r => setTimeout(() => r((r => r.hasAttribute('data-garden') ? 'garden' : r.dataset.theme)(document.documentElement)), 300))", "equals": "garden", "label": "the garden ignores a system change"},
+  {"click": "[data-garden-toggle]", "label": "leave the garden with the footer bee"},
+  {"wait": "!document.documentElement.hasAttribute('data-garden') && !document.documentElement.classList.contains('theme-reveal')", "timeout": 3000},
+  {"expect": "[document.documentElement.dataset.theme, localStorage.getItem('mk-theme'), localStorage.getItem('mk-garden')]", "equals": ["dark", null, null], "label": "with no saved theme it goes back to the system's"}
 ]

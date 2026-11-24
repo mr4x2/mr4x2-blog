@@ -38,7 +38,7 @@ Each feature file starts with an H1 title and a paragraph describing the behavio
 - [Search popup](./search.md) covers Ctrl K, `/`, Pagefind results for `Bangkok`, the keys, focus return and the missing-index message.
 - [404 page](./not-found.md) covers the typed `cd` command, the `bash: cd:` line, its path from the address bar, the bee that flies in beside `cd ~`, and the no-JavaScript fallback.
 - [Motion](./motion.md) covers the theme reveal, the title morph between pages, the reading bar, photo and TOC fades, the row link, the logo cursor, hover states and the footer bee.
-- [Garden mode](./garden.md) covers the opt-in garden that the footer bee turns on: the flower bed, the wandering bees, the bee that follows the pointer, a tap on a touch screen, a background tab, the next page, turning it off and reduced motion.
+- [Garden mode](./garden.md) covers the third theme: the theme button's dark → garden → light cycle, the footer bee's jump there and back, the flower bed, the wandering bees, the bee that follows the pointer, a tap on a touch screen, a background tab, the next page and reduced motion.
 - [Reading page](./reading.md) covers the `/reading` Bookmark list, the tag filter, search, the no-JS fallback and the empty state. It's **new in #15**.
 - [Raindrop sync](./sync.md) covers the author's sync command: the happy path, a bad token, missing settings, and leaving the file alone when nothing changed.
 - [Deploy chain](./deploy.md) covers the read-only checks that a merge or sync reached the live site.

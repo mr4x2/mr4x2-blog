@@ -1,16 +1,33 @@
-const KEY = "mk-theme";
+import { syncGarden } from "./garden.js";
+
+const THEME_KEY = "mk-theme";
+const GARDEN_KEY = "mk-garden";
 const root = document.documentElement;
 const system = matchMedia("(prefers-color-scheme: dark)");
+const NEXT = { dark: "garden", garden: "light", light: "dark" };
 let latestReveal = null;
-// The theme the reader last asked for. A reveal applies it a frame later, so a quick second click reads this, not data-theme.
+// The mode the reader last asked for. A reveal applies it a frame later, so a quick second click reads this, not the page.
 let wanted;
+let toggle;
+let gardenToggle;
 
-function saved() {
+function store(key, value) {
   try {
-    return localStorage.getItem(KEY);
+    if (value) localStorage.setItem(key, value);
+    else localStorage.removeItem(key);
+  } catch {}
+}
+
+function savedTheme() {
+  try {
+    return localStorage.getItem(THEME_KEY);
   } catch {
     return null;
   }
+}
+
+function systemTheme() {
+  return system.matches ? "dark" : "light";
 }
 
 function syncMeta() {
@@ -25,10 +42,17 @@ function syncMeta() {
   color.content = getComputedStyle(root).getPropertyValue("--bg").trim();
 }
 
-function apply(theme, toggle) {
+function syncButtons(mode) {
+  toggle.setAttribute("aria-label", `Switch to ${NEXT[mode]} mode`);
+  gardenToggle?.setAttribute("aria-pressed", String(mode === "garden"));
+}
+
+function apply(mode, origin) {
   root.classList.add("theme-swapping");
+  const theme = mode === "dark" ? "dark" : "light";
   root.dataset.theme = theme;
-  toggle.setAttribute("aria-pressed", String(theme === "dark"));
+  root.toggleAttribute("data-garden", mode === "garden");
+  syncButtons(mode);
   syncMeta();
   document
     .querySelector("iframe.giscus-frame")
@@ -36,55 +60,66 @@ function apply(theme, toggle) {
       { giscus: { setConfig: { theme } } },
       "https://giscus.app",
     );
+  syncGarden(origin);
   requestAnimationFrame(() =>
     requestAnimationFrame(() => root.classList.remove("theme-swapping")),
   );
 }
 
+function switchTo(mode, button) {
+  wanted = mode;
+  const box = button.getBoundingClientRect();
+  const origin = { x: box.left + box.width / 2, y: box.top + box.height / 2 };
+  if (!document.startViewTransition) {
+    apply(mode, origin);
+    return;
+  }
+  if (matchMedia("(prefers-reduced-motion: reduce)").matches) {
+    root.classList.add("theme-fade");
+  } else {
+    // The new mode grows as a circle from the button pressed until it covers the farthest corner.
+    const r = Math.hypot(
+      Math.max(origin.x, innerWidth - origin.x),
+      Math.max(origin.y, innerHeight - origin.y),
+    );
+    root.style.setProperty("--reveal-x", `${origin.x}px`);
+    root.style.setProperty("--reveal-y", `${origin.y}px`);
+    root.style.setProperty("--reveal-r", `${r}px`);
+    root.classList.add("theme-reveal");
+  }
+  const reveal = document.startViewTransition(() => apply(mode, origin));
+  latestReveal = reveal;
+  // A second click skips the first reveal, whose cleanup must not cut the second one short.
+  reveal.finished.finally(() => {
+    if (latestReveal === reveal)
+      root.classList.remove("theme-reveal", "theme-fade");
+  });
+}
+
 export function initTheme() {
-  const toggle = document.querySelector("[data-theme-toggle]");
-  toggle.setAttribute("aria-pressed", String(root.dataset.theme === "dark"));
+  toggle = document.querySelector("[data-theme-toggle]");
+  gardenToggle = document.querySelector("[data-garden-toggle]");
+  wanted = root.hasAttribute("data-garden") ? "garden" : root.dataset.theme;
+  syncButtons(wanted);
   syncMeta();
-  wanted = root.dataset.theme;
 
   toggle.addEventListener("click", () => {
-    const next = wanted === "dark" ? "light" : "dark";
-    wanted = next;
-    try {
-      localStorage.setItem(KEY, next);
-    } catch {}
-    if (!document.startViewTransition) {
-      apply(next, toggle);
-      return;
-    }
-    if (matchMedia("(prefers-reduced-motion: reduce)").matches) {
-      root.classList.add("theme-fade");
-    } else {
-      // The new theme grows as a circle from the toggle until it covers the farthest corner.
-      const box = toggle.getBoundingClientRect();
-      const x = box.left + box.width / 2;
-      const y = box.top + box.height / 2;
-      const r = Math.hypot(
-        Math.max(x, innerWidth - x),
-        Math.max(y, innerHeight - y),
-      );
-      root.style.setProperty("--reveal-x", `${x}px`);
-      root.style.setProperty("--reveal-y", `${y}px`);
-      root.style.setProperty("--reveal-r", `${r}px`);
-      root.classList.add("theme-reveal");
-    }
-    const reveal = document.startViewTransition(() => apply(next, toggle));
-    latestReveal = reveal;
-    // A second click skips the first reveal, whose cleanup must not cut the second one short.
-    reveal.finished.finally(() => {
-      if (latestReveal === reveal)
-        root.classList.remove("theme-reveal", "theme-fade");
-    });
+    const next = NEXT[wanted];
+    store(GARDEN_KEY, next === "garden" ? "on" : null);
+    if (next !== "garden") store(THEME_KEY, next);
+    switchTo(next, toggle);
+  });
+  // The footer bee jumps to the garden, and back to the theme the reader had before it.
+  gardenToggle?.addEventListener("click", () => {
+    const next =
+      wanted === "garden" ? (savedTheme() ?? systemTheme()) : "garden";
+    store(GARDEN_KEY, next === "garden" ? "on" : null);
+    switchTo(next, gardenToggle);
   });
 
-  system.addEventListener("change", (e) => {
-    if (saved()) return;
-    wanted = e.matches ? "dark" : "light";
-    apply(wanted, toggle);
+  system.addEventListener("change", () => {
+    if (savedTheme() || wanted === "garden") return;
+    wanted = systemTheme();
+    apply(wanted);
   });
 }
