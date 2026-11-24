@@ -18,12 +18,12 @@ const root = document.documentElement;
 const reduce = matchMedia("(prefers-reduced-motion: reduce)");
 let stopGarden = null;
 
-export function syncGarden(origin) {
+export function syncGarden(pressedAt) {
   const garden = document.querySelector(".garden");
   if (!garden) return;
   stopGarden?.();
   stopGarden = root.hasAttribute("data-garden")
-    ? startGarden(garden, origin)
+    ? startGarden(garden, pressedAt)
     : null;
 }
 
@@ -32,9 +32,12 @@ export function initGarden() {
   syncGarden();
 }
 
-function startGarden(garden, origin) {
+function startGarden(garden, pressedAt) {
   const air = garden.querySelector(".garden-air");
   const bed = garden.querySelector(".garden-bed");
+  bed
+    .querySelector(".garden-sun")
+    .classList.toggle("is-rising", Boolean(pressedAt));
   const template = garden.querySelector("[data-garden-bee]");
   const flowers = [...garden.querySelectorAll(".flower")];
   const ease = getComputedStyle(root).getPropertyValue("--ease-in-out").trim();
@@ -158,8 +161,8 @@ function startGarden(garden, origin) {
       saved = JSON.parse(sessionStorage.getItem(BEE_KEY));
     } catch {}
     // A new garden's bee starts beside the button that turned it on, as if the pointer were there.
-    const p = origin
-      ? { x: origin.x + FOLLOW_OFFSET, y: origin.y + FOLLOW_OFFSET }
+    const p = pressedAt
+      ? { x: pressedAt.x + FOLLOW_OFFSET, y: pressedAt.y + FOLLOW_OFFSET }
       : (saved ?? onFlower(flowers[Math.floor(flowers.length / 2)]));
     p.x = Math.min(Math.max(p.x, EDGE), innerWidth - EDGE);
     p.y = Math.min(Math.max(p.y, EDGE), innerHeight - EDGE);
