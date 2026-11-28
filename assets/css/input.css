@@ -118,6 +118,7 @@
   --dur-theme: 450ms;
   --dur-page: 250ms;
   --dur-flight: 480ms;
+  --dur-sunrise: 1.2s;
   --dur-flap: 120ms;
   --dur-buzz: 80ms;
   --stagger: 60ms;
@@ -872,7 +873,7 @@
   }
   @media (prefers-reduced-motion: no-preference) {
     .garden-sun.is-rising {
-      animation: garden-sun-rise var(--dur-flight) var(--ease-strong)
+      animation: garden-sun-rise var(--dur-sunrise) ease-out
         var(--dur-theme) both;
     }
   }
