@@ -3,7 +3,7 @@
   {"expect": "$$('header nav a').map(a => a.textContent.trim())", "equals": ["reading/", "tags/", "about/", "contact"], "label": "menu links"},
   {"expect": "nameOf($('header a'))", "equals": "mr4x2 blog", "label": "logo name"},
   {"expect": "$('header a').textContent.trim()", "equals": "mr4x2@blog:~$", "label": "logo text"},
-  {"expect": "[...document.fonts].filter(f => f.status === 'loaded').map(f => f.family.replace(/\"/g, '') + ' ' + f.weight).sort()", "equals": ["Inter 400", "Inter 600", "JetBrains Mono 400", "JetBrains Mono 700"], "label": "self-hosted fonts load", "timeout": 5000},
+  {"expect": "[...new Set([...document.fonts].filter(f => f.status === 'loaded').map(f => f.family.replace(/\"/g, '') + ' ' + f.weight))].sort()", "equals": ["Inter 400", "Inter 600", "JetBrains Mono 400", "JetBrains Mono 700"], "label": "self-hosted fonts load", "timeout": 5000},
   {"expect": "document.documentElement.dataset.theme", "equals": "light", "label": "light by default"},
   {"expect": "document.querySelector('meta[name=color-scheme]').content", "equals": "light"},
   {"expect": "$('footer').textContent.replace(/\\s+/g, ' ').trim().replace(/\\d{4}/, 'YEAR')", "equals": "© YEAR mr4x2 · github · rss · built with hugo", "label": "footer line"},

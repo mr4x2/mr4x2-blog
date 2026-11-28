@@ -1,6 +1,6 @@
 # Home page
 
-The home page opens with `$ whoami` and one line about the author, then `$ top --tracks --last 4w` with the author's five Top tracks (when `data/top_tracks.json` has any), then `$ ls -t ~/posts`, a line of tag links, and the Posts newest first. A row shows the date (`2026-02-17`), the title, the summary, the tags (`#travel`) and a thumbnail from the front-matter `image`. The header and footer are on every page and are checked here too: logo, menu (`reading/`, `tags/`, `about/`, `contact`), Search, theme toggle, and the footer line. On the first visit of a browser session `whoami` types itself out while the list fades in. Later visits in the session show everything at once.
+The home page opens with `$ whoami` and one line about the author, then `$ top --tracks --last 4w` with the author's five Top tracks (when `data/top_tracks.json` has any), then `$ ls -t ~/posts`, a line of tag links, and the Posts newest first. A row shows the date (`2026-02-17`), the title, the summary, the tags (`#travel`) and a thumbnail from the front-matter `image`. The header and footer are on every page and are checked here too, by `chrome.json`: logo, menu (`reading/`, `tags/`, `about/`, `contact`), the self-hosted fonts, the theme button, and the footer line. On the first visit of a browser session `whoami` types itself out while the list fades in. Later visits in the session show everything at once.
 
 ## Sub-features
 
@@ -27,7 +27,7 @@ Preconditions:
 
 - A run is healthy per `doctor`.
 - The working tree has the two travel Posts and the About page, and `data/reading.json` is the committed one.
-- `data/top_tracks.json` is the committed `[]`, except while you run `home-tracks`: copy the fixture over it first (below).
+- `data/top_tracks.json` is the committed file. The daily Top tracks sync keeps it filled with the author's real tracks, so a default run shows the block. `home.json` doesn't depend on its content. Copy the fixture over it for `home-tracks`, and write `[]` to it for the empty case (below).
 
 ```bash
 K=.claude/skills/verify-mr4x2-blog
@@ -39,6 +39,7 @@ node $K/scripts/drive.mjs --run RUN_ID --name home-intro-blocked $K/journeys/hom
 node $K/scripts/drive.mjs --run RUN_ID --name home-reduced $K/journeys/home-reduced.json
 node $K/scripts/drive.mjs --run RUN_ID --name home-contrast $K/journeys/home-contrast.json
 node $K/scripts/drive.mjs --run RUN_ID --name home-nojs --no-js $K/journeys/home-nojs.json
+node $K/scripts/drive.mjs --run RUN_ID --name chrome $K/journeys/chrome.json
 ```
 
 `home-tracks` needs the fixture. Relaunch the run after copying it: a `local` run that was already up when the fixture and the partial landed kept serving the page without the block. Never commit the fixture.
@@ -49,22 +50,24 @@ node $K/scripts/drive.mjs --run RUN_ID --name home-tracks $K/journeys/home-track
 node $K/scripts/drive.mjs --run RUN_ID --name home-tracks-dark --dark $K/journeys/home-tracks.json
 node $K/scripts/drive.mjs --run RUN_ID --name home-tracks-phone --width 390 --height 844 $K/journeys/home-tracks.json
 node $K/scripts/drive.mjs --run RUN_ID --name home-tracks-nojs --no-js $K/journeys/home-tracks.json
-git checkout -- data/top_tracks.json   # put the committed [] back
+git checkout -- data/top_tracks.json   # put the synced tracks back
 ```
 
 - **`home.json`** waits for the intro to end, then checks the `whoami` prompt and line, the `ls` line, the tag links (`#travel`, `#fossasia`, `#france`, `#openinfra-submit`, `#thailand`), the titles and dates newest first, each row's tags, that About and Reading are not listed, that there is no pager, a loaded thumbnail per row under 30 KB, and no accent border on `whoami`. It saves a screenshot and the rendered text, then clicks `tags/`, `#travel`, a Post title and the logo. Run it with `--dark` and with `--width 390` too.
-- **`home-tracks.json`** waits for the intro to end, then checks that the block is the next sibling of `.who`, the `$ top --tracks --last 4w` prompt, ranks `01` to `05`, the five fixture titles in order (the last one holds `&`, quotes and a literal `<b>`), the two-artist row (`— Phoebe Bridgers, Julien Baker`), that every link opens open.spotify.com with `target="_blank"` and `noopener`, that the block text holds no time or date, that `--i` runs `1, 2, 3, 4` over tracks, the `ls` section and the two Posts, and that the hover rule is inside `(hover: hover) and (pointer: fine)`. Run it with the fixture in place, then with `[]` restored: `home.json` must still pass and `!$('.tracks')` must hold.
+- **`home-tracks.json`** waits for the intro to end, then checks that the block is the next sibling of `.who`, the `$ top --tracks --last 4w` prompt, ranks `01` to `05`, the five fixture titles in order (the last one holds `&`, quotes and a literal `<b>`), the two-artist row (`— Phoebe Bridgers, Julien Baker`), that every link opens open.spotify.com with `target="_blank"` and `noopener`, that the block text holds no time or date, that `--i` runs `1, 2, 3, 4` over tracks, the `ls` section and the two Posts, and that the hover rule is inside `(hover: hover) and (pointer: fine)`. Run it with the fixture in place. For the empty case, write `[]` to `data/top_tracks.json` and relaunch: `home.json` must still pass and `!$('.tracks')` must hold. Then put the synced file back with `git checkout`.
 - **`home-intro.json`** samples the page every 50 ms during the first visit. `whoami` must grow one character at a time while the class on `<html>` is `intro-typing`, the answer line must stay hidden until the typing ends, and the list must already be fading in. It ends with no class and the key `mk-intro-seen` set. A second visit must show everything at once.
 - **`home-intro-blocked.json`** blocks `main.*.js`. The page must keep the hidden state (`intro-pending`, every opacity 0), then show everything after the 2 second failsafe.
 - **`home-reduced.json`** never types, never moves (`transform: none`), fades in over 0.2 s and keeps the logo cursor solid. Its theme toggle runs a 200 ms cross-fade (`theme-fade`), never the circle.
 - **`home-contrast.json`** reads the four color tokens with no preference, then under `prefers-contrast: more` in light and in dark, and checks a summary, the header divider and a tag link. Its `media` steps set the color scheme too, so `--dark` changes nothing.
 - **`home-nojs.json`** checks the text, the header links and the hidden buttons with JavaScript off.
+- **`chrome.json`** checks the menu, the logo's name and text, the loaded fonts (Inter 400 and 600, JetBrains Mono 400 and 700), the light default, and the footer line and links. It then steps the theme button light → dark → garden → light, checks what each step saves and the button's next label, and checks that a reload in dark paints dark in its first frame. It asserts a light default, so run it without `--dark`.
 - **Proof.** Keep `home`, `after-intro`, `hidden-state` and `failsafe`, at 1280 and 390, light and dark, plus `contrast-light` and `contrast-dark`.
 
 ## Gotchas
 
 - Home checks must not assume the first `.sec` is the posts section. With Top tracks present the first `.sec` is the tracks block, so select the posts one with `$('.sec:has(.tag-line)')`.
-- The fixture is untracked test data. Put the committed `[]` back with `git checkout -- data/top_tracks.json` before you commit, so the fixture never ships.
+- The fixture and the `[]` are test data. Put the synced file back with `git checkout -- data/top_tracks.json` before you commit, so neither ships.
+- Each font comes in a Latin and a Vietnamese file, picked by `unicode-range`. A page with Vietnamese text, such as a Top track title, also loads the Vietnamese file, so `document.fonts` holds `Inter 400` twice. A font check compares family and weight with duplicates removed.
 - `home-intro.json` fails about 2 runs in 8, with or without the tracks block: it samples every 50 ms against a 60 ms reveal delay. Rerun it before you suspect the change.
 - Every journey starts with a fresh browser profile, so the intro plays on the first `goto`. A journey that does not care about it waits for `!document.documentElement.className.includes('intro')`.
 - The thumbnail comes from `resources.Get "photos/<image>"`, where `static/trip-in-*` is mounted at `assets/photos` in `hugo.toml`. A Post whose `image` is not under `static/trip-in-*` gets a row with no thumbnail.

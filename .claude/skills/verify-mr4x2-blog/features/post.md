@@ -9,7 +9,7 @@ A Post page shows the date and reading time in monospace (`2025-03-29 · 3 min r
 - `post-figures` renders `![alt](path#center "Caption")` as a centered figure whose caption is the title text.
 - `post-code` colors code blocks with the Chroma palette of the active theme.
 - `post-nav` links to the older and the newer Post, and `cd ~` returns to `/`.
-- `post-comments` loads giscus with the site theme, maps the thread by pathname, and sends giscus the new theme when the reader toggles it.
+- `post-comments` loads giscus with the site theme, maps the thread by pathname, and sends giscus the new theme when the reader changes it. The garden is a light page, so giscus gets `light` for it.
 - `post-preview` uses the front-matter `image` for the social preview and the JSON-LD `image`, and falls back to `images/og-image.png`.
 - `about-page` renders About as a plain page that keeps its giscus thread (`/about/`, 2 comments today).
 
@@ -38,7 +38,7 @@ node $K/scripts/drive.mjs --run RUN_ID --name post-giscus $K/journeys/post-giscu
 
 - **`post.json`** opens the Thailand Post from the list and checks the date and reading time, title, heading tracking, tags, the open `$ cat toc`, and that the first TOC link lands the heading below the header. It checks the two captions (`Canals in Bangkok`, `Pad Thai`), that a `#center` image is centered, that a photo loads where the reader scrolls, that the page does not scroll sideways (the YouTube iframe is 560 px wide in the Markdown), the JSON-LD and `og:image` image, and the giscus script's theme, mapping and repo. It injects a code block to check both Chroma palettes, then follows `newer`, `older` and `cd ~`. Run it with `--dark` and `--width 390` too.
 - **`about.json`** opens About from the menu, checks that it has no date, TOC, tags or older and newer links, that the text renders, and that giscus keeps the pathname mapping.
-- **`post-giscus.json`** needs the network. It waits for the real giscus iframe, checks that its `theme` query is the site theme, toggles the theme, and checks that the page posted `{giscus: {setConfig: {theme}}}` to `https://giscus.app`. Its two screenshots show the comments before and after. Report it as skipped, with the reason, when giscus.app is unreachable.
+- **`post-giscus.json`** needs the network. It waits for the real giscus iframe, checks that its `theme` query is the site theme, clicks the theme button once (light → dark, or dark → garden under `--dark`), and checks that the page posted `{giscus: {setConfig: {theme}}}` to `https://giscus.app`. Its two screenshots show the comments before and after. Report it as skipped, with the reason, when giscus.app is unreachable.
 - **Proof.** Keep `post-top`, `post-figure`, `post-code`, `giscus-before` and `giscus-after`.
 
 ## Gotchas
