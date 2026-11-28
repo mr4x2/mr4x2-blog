@@ -22,8 +22,8 @@ Ctrl K (⌘K on a Mac) toggles a search popup on every page, and `/` opens it wh
 Preconditions:
 
 - A run is healthy per `doctor`.
-- For the results journey, the index exists. Stop any run, then `npm run search` builds the site into `public/` and writes `static/pagefind/` (gitignored). Delete `public/`, and launch.
-- For the missing-index journey, `static/pagefind/` does not exist. Move it aside first.
+- For the results journey, the index exists. A `prod` run always has it, because the image build runs Pagefind, so it needs no setup there. For `local`, stop any run, then `npm run search` builds the site into `public/` and writes `static/pagefind/` (gitignored). Delete `public/`, and launch.
+- The missing-index journey runs on `local` only, with no `static/pagefind/`. A fresh checkout has none; otherwise move it aside first. On `prod` the index is always there, so `search-noindex.json` fails there by design.
 
 ```bash
 K=.claude/skills/verify-mr4x2-blog

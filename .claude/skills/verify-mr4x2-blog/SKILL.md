@@ -1,11 +1,11 @@
 ---
 name: verify-mr4x2-blog
-description: Drive the mr4x2.com Hugo blog the way a reader or the author would, and capture proof. Covers the web pages (home with its typing intro, posts, About, tags, the Reading page, the search popup and the 404 page, in light and dark mode), the slop check, the Raindrop sync CLI, and the production deploy chain (GitHub Actions → Docker Hub → Watchtower). Use it to verify a template, content, CSS, JavaScript, sync or deploy change before you claim it works.
+description: Drive the mr4x2.com Hugo blog the way a reader or the author would, and capture proof. Covers the web pages (home with its typing intro and Top tracks, posts, About, tags, the Reading page, the search popup and the 404 page, in light, dark and garden mode), the slop check, the Raindrop and Spotify Top tracks sync CLIs, and the production deploy chain (GitHub Actions → Docker Hub → Watchtower). Use it to verify a template, content, CSS, JavaScript, sync or deploy change before you claim it works.
 ---
 
 # Verify the mr4x2 blog
 
-The site is a Hugo blog. Readers touch **web pages**, and the author also runs a **sync CLI** (`scripts/sync_raindrop.py`) and a **deploy chain**. Start with the feature map: `features/README.md` lists every feature and its recipe file.
+The site is a Hugo blog. Readers touch **web pages**, and the author also runs two **sync CLIs** (`scripts/sync_raindrop.py` for Reading, `scripts/sync_top_tracks.py` for Top tracks) and a **deploy chain**. Start with the feature map: `features/README.md` lists every feature and its recipe file.
 
 Helpers live in this skill's `scripts/`, so call them by repo-relative path from the repo root:
 
@@ -70,7 +70,7 @@ node $V/drive.mjs --run RUN_ID --name JOURNEY [--no-js] [--dark] [--width 390] s
 - A click that navigates is fine: the next step re-attaches to the new page. Follow it with a `wait` on `location.pathname`.
 - Pass steps from a quoted heredoc (`<<'EOF'`) or a file. `printf` and `echo -e` eat the backslashes in the JSON. In expressions, prefer single quotes for JS strings.
 - Chromium comes from `~/.cache/ms-playwright/chromium-*`. Set `CHROME=` to use another binary.
-- **For the CLI** (sync feature), run the command directly and capture the command, stdout, stderr and exit code into the run directory. See `features/sync.md`.
+- **For the CLIs** (the two syncs), run the command directly and capture the command, stdout, stderr and exit code into the run directory. See `features/sync.md` and `features/tracks-sync.md`.
 - **For the deploy chain**, the checks are read-only `gh`, `curl` and `docker logs` commands. See `features/deploy.md`.
 
 ## Evidence
@@ -78,8 +78,8 @@ node $V/drive.mjs --run RUN_ID --name JOURNEY [--no-js] [--dark] [--width 390] s
 - Everything for a run goes to `.verify/runs/RUN_ID/` (gitignored). That includes `server.log` and one folder per journey, each holding the numbered PNG and HTML files, `results.json` (every step and its value) and `console.log`.
 - **A proof captures the action and the resulting state**: a screenshot before and after the action, and an `expect` on the resulting DOM, not only the final screen.
 - **Drive the real user path**: a click on the tag button, typing in the search box, or the link in the header menu. Don't call page functions or set the hash to stand in for a click, unless the feature file names the hash as an entry point of its own.
-- **Check side effects too**. For the sync, that means the written `data/reading.json` (its content and `git diff`), not just the printed summary. For a deploy, it means the new image ID in the running container, not just a green CI run.
-- Mocks are only acceptable at the Raindrop API boundary, through the unit tests. Journeys use the real API, or skip and say so.
+- **Check side effects too**. For a sync, that means the written `data/reading.json` or `data/top_tracks.json` (its content and `git diff`), not just the printed summary. For a deploy, it means the new image ID in the running container, not just a green CI run.
+- Mocks are only acceptable at the Raindrop and Spotify API boundaries, through the unit tests. Journeys use the real API, or skip and say so.
 - Report a skipped or unreachable entry point as **skipped, with the reason**. Never report it as verified through some other path.
 
 ## Slop check
@@ -113,4 +113,4 @@ $V/verify.sh list           # shows any runs still up
 - `scripts/drive.mjs --run RUN_ID --name JOURNEY [--no-js] [--dark] [--width N] [--height N] STEPS.json|-`
 - `scripts/slop-check.sh` runs the CLAUDE.md "Avoid slop" grep.
 
-Both are executable and dependency-free: bash, curl, python3, Node ≥ 22 for the built-in WebSocket, Docker for `prod` mode, and a cached Playwright Chromium.
+All three are executable and dependency-free: bash, curl, python3, Node ≥ 22 for the built-in WebSocket, Docker for `prod` mode, and a cached Playwright Chromium.

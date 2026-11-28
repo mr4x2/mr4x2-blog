@@ -1,6 +1,6 @@
 # Reading page
 
-The Reading page (`/reading/`, new in #15) lists every Bookmark from the Reading collection as one flat list, newest first, in the style of pliutau.com/reading-list. Each row shows the Read date (`2026-11-21`), the title (opens in a new tab), `- site`, and the author's Note under it if there is one. A search box and tag buttons above the list narrow it, and an "N of M" status shows how many rows match. Without JavaScript the full list still shows, and the filter controls stay hidden.
+The Reading page (`/reading/`) lists every Bookmark from the Reading collection as one flat list, newest first, in the style of pliutau.com/reading-list. Each row shows the Read date (`2026-11-21`), the title (opens in a new tab), `- site`, and the author's Note under it if there is one. A search box and tag buttons above the list narrow it, and an "N of M" status shows how many rows match. Without JavaScript the full list still shows, and the filter controls stay hidden.
 
 ## Sub-features
 
@@ -26,7 +26,7 @@ The Reading page (`/reading/`, new in #15) lists every Bookmark from the Reading
 
 Preconditions:
 
-- A run is healthy per `doctor`, on a branch that contains #15.
+- A run is healthy per `doctor`.
 - `data/reading.json` holds known Bookmarks. For a fixture run, copy the committed fixture over it: `cp .claude/skills/verify-mr4x2-blog/fixtures/reading.json data/reading.json`. It has 5 entries: one tagged `ceph` whose Excerpt alone says `bluestore`, one untagged, one titled with a long unbroken URL and tagged `machine learning` with a two-line Note, one with the Note `<b>bold</b> & "quotes"`, and one titled `Tiếng Việt`. For a real-data run, read the expected values from the file.
 - Handles: the search box is `{role: "searchbox", name: "Search bookmarks"}`. Tag buttons are `{role: "button", name: "<tag>"}` inside `{role: "group", name: "Filter by tag"}`, plus a button named `All`. The count is `{role: "status"}`. Rows are `li[data-tags]`, each starting with a `<time>`.
 
@@ -44,7 +44,7 @@ git checkout -- data/reading.json
 - **`reading.json`** opens the page from the menu, then checks the menu order, the row dates newest first, no month headings, title links with `noopener`, escaping, the two-line Note, the hidden Excerpt, button order and labels, and `5 of 5`. It clicks `ceph` (`1 of 5`, pressed), then `machine learning` (`#tag=machine-learning`), then All. It searches for `BlueStore` (Excerpt only), `  tiếng ` (trimmed) and `zzz-nothing` (`0 of 5`), and checks search plus tag. It leaves for `/` (Reading not in the list), opens `/reading/#tag=storage` (`2 of 5`), checks `/tags/` has no Bookmark tags, and opens `/reading/#tag=nope` (falls back to All).
 - **`reading-phone.json`** at 390 px: no sideways scroll, then a tag click.
 - **`reading-nojs.json`**: all 5 rows visible, controls hidden.
-- **Empty.** Replace `data/reading.json` with `[]` (the committed state) or move it aside, then `{"goto": "/reading/"}` and `{"expect": "document.body.innerText.includes('Nothing here yet.')"}`.
+- **Empty.** Replace `data/reading.json` with `[]` or move it aside, then `{"goto": "/reading/"}` and `{"expect": "document.body.innerText.includes('Nothing here yet.')"}`. `main` holds no rows and no controls. The search popup's own `role=status` line is on every page, so scope a controls check to `main`. Put the synced file back with `git checkout -- data/reading.json`: the committed file holds the real Bookmarks the hourly sync wrote, not `[]`.
 - **Proof.** Keep `before-tag`, `after-tag`, `no-match`, the phone shots and the `--no-js` shot.
 
 ## Gotchas
